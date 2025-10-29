@@ -1,7 +1,11 @@
 import {Text, View, StyleSheet, Button, Alert} from "react-native";
+import { useRouter } from 'expo-router';
+
 
 export default function Index() {
-  return (
+    const router = useRouter();
+
+    return (
     <View
       style={{
         flex: 1,
@@ -20,12 +24,12 @@ export default function Index() {
         </Text>
         <Button
             title={"Utwórz swoje konto klienta"}
-            onPress={() => { alert("Hello World") }}
+            onPress={() => { router.push('/(tabs)/Register') }}
         />
         <Text style={styles.baseText}>
             Masz już u nas konto?
         </Text>
-        <Button title={"Zaloguj się"}/>
+        <Button title={"Zaloguj się"} onPress={() => { router.push('/(tabs)/Login') }}/>
 
         {/*<div className="centerHeader">*/}
         {/*    /!*<img src={stockImg1} alt="Photo" className="stockImg"/>*!/*/}
