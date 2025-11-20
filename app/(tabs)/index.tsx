@@ -1,3 +1,5 @@
+// npx expo run:android --no-build-cache --device
+
 import {Text, View, StyleSheet, Button, Alert} from "react-native";
 import { useRouter } from 'expo-router';
 

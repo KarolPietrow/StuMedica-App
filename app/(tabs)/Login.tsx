@@ -1,5 +1,6 @@
 import {Text, View, StyleSheet, Button, Alert, TextInput} from "react-native";
 import {useState} from "react";
+import loginApi from "@/app/authService";
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -23,14 +24,12 @@ export default function Login() {
         if (!validate()) return;
         setLoading(true);
         try {
-            // const res = await loginApi(email.trim(), password);
-            // // oczekujemy odpowiedzi np. { access_token: "...", token_type: "bearer" } lub { token: "..." }
-            // const token = res?.access_token ?? res?.token ?? null;
-            // if (!token) throw new Error('Brak tokena w odpowiedzi serwera');
-            //
-            // await saveToken(token);
-            // // nawiguj i zastąp historię (replace) żeby użytkownik nie wrócił do /login
-            // router.replace(redirectTo);
+            const res = await loginApi(email.trim(), password);
+            if (res === true) {
+                Alert.alert("Dane poprawne")
+            } else {
+                Alert.alert("Dane niepoprawne")
+            }
         } catch (err: any) {
             Alert.alert('Błąd logowania', err.message ?? String(err));
         } finally {
@@ -78,6 +77,10 @@ export default function Login() {
                 autoComplete="password"
                 placeholder="Hasło"
                 importantForAutofill='yes'
+                keyboardType='default'
+                textContentType="password"
+                autoCorrect={false}
+                autoCapitalize="none"
             />
             <Button title={"Zaloguj się"} onPress={() => { handleLogin() }}/>
         </View>
