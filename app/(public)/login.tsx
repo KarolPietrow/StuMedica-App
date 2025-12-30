@@ -146,7 +146,7 @@ export default function Login() {
                             autoCapitalize="none"
                             importantForAutofill='yes'
                             value={email}
-                            onChangeText={(text) => handleOnChange('email', text, setEmail)}
+                            onChangeText={(email) => handleOnChange('email', email.replace(/\s/g, ''), setEmail)}
                         />
                         {error.email && (
                             <Text style={[styles.errorText, { color: theme.error }]}>{error.email}</Text>
