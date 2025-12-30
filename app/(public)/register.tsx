@@ -73,14 +73,17 @@ export default function Register() {
         Keyboard.dismiss();
         let isValid = true;
 
-        if (!name.trim()) {
+        const cleanName = name.trim().replace(/\s+/g, ' ');
+        const cleanEmail = email.trim();
+
+        if (!cleanName) {
             newError.name = "Podaj imię i nazwisko.";
             isValid = false;
         }
-        if (!email) {
+        if (!cleanEmail) {
             newError.email = 'Podaj adres email.';
             isValid = false;
-        } else if (!/\S+@\S+\.\S+/.test(email)) {
+        } else if (!/\S+@\S+\.\S+/.test(cleanEmail)) {
             newError.email = 'Podaj poprawny adres email.';
             isValid = false;
         }
@@ -108,7 +111,7 @@ export default function Register() {
         setIsLoading(true);
 
         try {
-            await registerApi(name, email, password);
+            await registerApi(cleanName, cleanEmail, password);
             alert("Konto utworzone pomyślnie, możesz się zalogować!")
             router.replace('/login');
         } catch (error: any) {
@@ -180,8 +183,7 @@ export default function Register() {
                                     keyboardType="email-address"
                                     autoCapitalize="none"
                                     value={email}
-                                    onChangeText={(text) => handleOnChange('email', text, setEmail)}
-
+                                    onChangeText={(email) => handleOnChange('email', email.replace(/\s/g, ''), setEmail)}
                                     autoComplete="email"
                                     importantForAutofill='yes'
                                 />
