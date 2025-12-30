@@ -2,28 +2,27 @@ import {ScrollView, StyleSheet, Text, useColorScheme, View} from "react-native";
 import { COLORS, GLOBAL_STYLES, SIZES } from "@/styles/theme";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import React from "react";
-import {SafeAreaView} from "react-native-safe-area-context";
 
 
-export default function Dashboard() {
+export default function Medicine() {
     const colorScheme = useColorScheme();
     const theme = COLORS[colorScheme ?? 'light'];
 
     return (
-        // <SafeAreaView >
-            <ScrollView style={[GLOBAL_STYLES.container, { backgroundColor: theme.background}]}>
-                <View style={[styles.contentContainer, {marginTop: 50}]}>
-                    <View style={[styles.contentContainer, {alignItems: 'center'}]}>
-                        <Text style={[styles.heading, { color: theme.text }]}>
-                            Witaj w StuMedica!
-                        </Text>
-                        <Text style={[styles.description, { color: theme.text}]}>
-                            Coming soon
-                        </Text>
-                    </View>
+        <ScrollView style={[GLOBAL_STYLES.container, { backgroundColor: theme.background }]}>
+            <View style={[styles.contentContainer, {marginTop: 50}]}>
+                <View style={styles.contentContainer}>
+                    <Text style={[styles.heading, { color: theme.text }]}>
+                        Lista leków
+                    </Text>
+
+                    <Text style={[styles.heading, { color: theme.text }]}>
+                        Recepty
+                    </Text>
+
                 </View>
-            </ScrollView>
-        // </SafeAreaView>
+            </View>
+        </ScrollView>
     );
 }
 

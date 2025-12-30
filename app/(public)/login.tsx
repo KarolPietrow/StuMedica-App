@@ -18,8 +18,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES, GLOBAL_STYLES } from '@/styles/theme';
 import {router} from "expo-router";
 import BackButton from "@/components/BackButton";
+import { useSession } from "@/context/AuthContext";
 
 export default function Login() {
+    const { signIn } = useSession();
+
     const colorScheme = useColorScheme();
     const theme = COLORS[colorScheme ?? 'light'];
 
@@ -80,14 +83,15 @@ export default function Login() {
         setIsLoading(true);
 
         try {
-            const isSuccess = await loginApi(email.trim(), password);
+            await signIn(email.trim(), password);
 
-            if (isSuccess) {
-                router.replace('/dashboard');
-            } else {
-                setError({email: '', password: '', general: 'Nie udało się zalogować. Sprawdź poprawność danych i spróbuj ponownie.'})
-            }
+            // if (isSuccess) {
+            //     router.replace('/dashboard');
+            // } else {
+            //     setError({email: '', password: '', general: 'Nie udało się zalogować. Sprawdź poprawność danych i spróbuj ponownie.'})
+            // }
         } catch (err: any) {
+            console.log(err);
             if (err.response && err.response.status_code === 401) {
                 setError({email: '', password: '', general: 'Nie udało się zalogować. Sprawdź poprawność danych i spróbuj ponownie.'})
             } else {

@@ -1,25 +1,20 @@
-import {ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View} from "react-native";
+import {ScrollView, StyleSheet, Text, useColorScheme, View} from "react-native";
 import { COLORS, GLOBAL_STYLES, SIZES } from "@/styles/theme";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import React from "react";
-import {router} from "expo-router";
 
 
-export default function Account() {
+export default function Appointment() {
     const colorScheme = useColorScheme();
     const theme = COLORS[colorScheme ?? 'light'];
 
     return (
         <ScrollView style={[GLOBAL_STYLES.container, { backgroundColor: theme.background }]}>
-            <View style={styles.contentContainer}>
-                <View style={[styles.contentContainer, {marginTop: 50, alignItems: 'center'}]}>
+            <View style={[styles.contentContainer, {marginTop: 50}]}>
+                <View style={styles.contentContainer}>
                     <Text style={[styles.heading, { color: theme.text }]}>
-                        Twoje Konto
+                        Umów wizytę
                     </Text>
-
-                    <TouchableOpacity onPress={() => router.replace("/")}>
-                        <Text style={{ color: theme.primary, fontWeight: 'bold', fontSize:20, marginTop: 20 }}>Wyloguj się</Text>
-                    </TouchableOpacity>
                 </View>
             </View>
         </ScrollView>

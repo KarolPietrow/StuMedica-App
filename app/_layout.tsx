@@ -1,12 +1,22 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from "expo-router";
-import {StatusBar} from "expo-status-bar";
-import {Platform, useColorScheme} from "react-native";
-import {COLORS} from "@/styles/theme";
+import { Stack, Slot, useRouter, useSegments } from "expo-router";
+import {ActivityIndicator, Platform, useColorScheme, View} from "react-native";
+import { COLORS } from "@/styles/theme";
 import {useEffect, useState} from "react";
 import "@/styles/global.css"
+import { SessionProvider, useSession } from '@/context/AuthContext';
 
 export default function RootLayout() {
+    return (
+        <SessionProvider>
+            <InitialLayout />
+        </SessionProvider>
+    );
+}
+
+function InitialLayout() {
+    const { session, isLoading } = useSession();
+
     const colorScheme = useColorScheme()
     const theme = COLORS[colorScheme ?? 'light'];
     const [mounted, setMounted] = useState(false);
@@ -29,27 +39,24 @@ export default function RootLayout() {
         setMounted(true);
     }, []);
 
-    if (!mounted) return null;
+    if (!mounted || isLoading) {
+        return null;
+    }
 
     return (
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
             <Stack>
-                <Stack.Screen name="(home)" options={{ headerShown: false }} />
-                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Protected guard={!session}>
+                    <Stack.Screen name="(public)" options={{ headerShown: false }} />
+                </Stack.Protected>
+
+                <Stack.Protected guard={!!session}>
+                    <Stack.Screen name="(protected)" options={{ headerShown: false }} />
+                </Stack.Protected>
                 <Stack.Screen
                     name="terms-of-service"
                     options={{
                         presentation: 'modal',
-                        headerShown: false
-                    }} />
-                <Stack.Screen
-                    name="login"
-                    options={{
-                        headerShown: false
-                    }} />
-                <Stack.Screen
-                    name="register"
-                    options={{
                         headerShown: false
                     }} />
             </Stack>

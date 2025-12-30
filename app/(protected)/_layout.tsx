@@ -4,7 +4,6 @@ import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 import { NativeTabs, Icon, Label } from 'expo-router/unstable-native-tabs';
 import { Platform } from "react-native";
 
-
 export default function TabLayout() {
     return (
         <NativeTabs>
@@ -12,11 +11,15 @@ export default function TabLayout() {
                 <Label>Główna</Label>
                 <Icon sf="house.fill" />
             </NativeTabs.Trigger>
-            <NativeTabs.Trigger name="Calendar">
-                <Label>Kalendarz</Label>
+            <NativeTabs.Trigger name="appointments">
+                <Label>Wizyty</Label>
                 <Icon sf="calendar" />
             </NativeTabs.Trigger>
-            <NativeTabs.Trigger name="Account">
+            <NativeTabs.Trigger name="medicine">
+                <Label>Leki</Label>
+                <Icon sf="calendar" />
+            </NativeTabs.Trigger>
+            <NativeTabs.Trigger name="account">
                 <Label>Konto</Label>
                 <Icon sf="person"/>
             </NativeTabs.Trigger>

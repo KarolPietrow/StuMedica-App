@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import {SafeAreaView} from "react-native-safe-area-context";
 import React from 'react'
+import {GlassView} from "expo-glass-effect";
 
 
 export default function Index() {
@@ -38,13 +39,21 @@ export default function Index() {
                 </View>
 
                 <View style={styles.buttonsContainer}>
-                    <TouchableOpacity
+                    <GlassView
+                        isInteractive
+                        style={{
+                            borderRadius: SIZES.radius,
+
+                        }}
+                    >
+                        <TouchableOpacity
                         style={[GLOBAL_STYLES.primaryButton, GLOBAL_STYLES.shadow]}
                         onPress={() => { router.push('/login') }}
                         activeOpacity={0.8}
-                    >
-                        <Text style={styles.primaryButtonText}>Zaloguj się</Text>
-                    </TouchableOpacity>
+                        >
+                            <Text style={styles.primaryButtonText}>Zaloguj się</Text>
+                        </TouchableOpacity>
+                    </GlassView>
 
                     <View style={[GLOBAL_STYLES.center, { marginTop: 10, gap: 10 }]}>
                         <Text style={{ color: theme.textSecondary }}>Nie masz jeszcze konta?</Text>

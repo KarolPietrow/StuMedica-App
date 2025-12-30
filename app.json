@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.stumedica-mobile"
+      "bundleIdentifier": "pl.stumedica.stumedica-mobile"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +21,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.stumedica_mobile"
+      "package": "pl.stumedica.stumedica_mobile"
     },
     "web": {
       "bundler": "metro",
