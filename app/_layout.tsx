@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack, Slot, useRouter, useSegments } from "expo-router";
-import {ActivityIndicator, Platform, useColorScheme, View} from "react-native";
+import { Stack } from "expo-router";
+import { Platform, useColorScheme } from "react-native";
 import { COLORS } from "@/styles/theme";
 import {useEffect, useState} from "react";
 import "@/styles/global.css"
@@ -56,7 +56,7 @@ function InitialLayout() {
                 <Stack.Screen
                     name="terms-of-service"
                     options={{
-                        presentation: 'modal',
+                        // presentation: 'modal',
                         headerShown: false
                     }} />
             </Stack>

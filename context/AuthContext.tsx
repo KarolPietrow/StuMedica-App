@@ -15,6 +15,14 @@ interface AuthContextType {
     signOut: () => Promise<void>;
     session: string | null;
     isLoading: boolean;
+    user: UserProfile | null;
+    refreshUser: () => Promise<void>;
+}
+
+export interface UserProfile {
+    name: string;
+    email: string;
+    // account_type: string;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -31,30 +39,48 @@ export function useSession() {
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
     const [session, setSession] = useState<string | null>(null);
+    const [user, setUser] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    const refreshUser = async () => {
+        try {
+            const res = await fetchWithAuth('/auth/me');
+            if (res.ok) {
+                const userData = await res.json();
+                setUser(userData);
+            } else {
+                setUser(null);
+            }
+        } catch (e) {
+            console.log("Nie udało się odświeżyć danych użytkownika", e);
+        }
+    };
+
     useEffect(() => {
-        const loadToken = async () => {
+        const loadUserSession = async () => {
             try {
                 if (Platform.OS === 'web') {
                     const userData = await validateSession();
                     if (userData) {
                         setSession('active_web_session');
+                        setUser(userData);
                     }
                 } else {
                     const token = await getToken();
                     if (token) {
                         setSession(token);
+                        await refreshUser();
                     }
-
                 }
             } catch (e) {
-                console.log("Błąd odczytu tokena", e);
+                console.log("Błąd przywracania sesji", e);
+                setSession(null);
+                setUser(null);
             } finally {
                 setIsLoading(false);
             }
         };
-        loadToken();
+        loadUserSession();
     }, []);
 
     const signIn = async (email: string, password: string) => {
@@ -62,8 +88,9 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
             const data = await loginApi(email, password);
 
             if (data.token) {
-                setSession(data.token);
                 await saveToken(data.token);
+                setSession(data.token);
+                await refreshUser();
                 router.replace('/dashboard');
             }
         } catch (error) {
@@ -73,8 +100,10 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     };
 
     const signOut = async () => {
+        await removeToken();
         await logoutApi();
         setSession(null);
+        setUser(null);
         router.replace('/(public)/(home)');
     };
 
@@ -85,6 +114,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
                 signOut,
                 session,
                 isLoading,
+                user,
+                refreshUser,
             }}
         >
             {children}

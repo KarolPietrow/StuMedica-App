@@ -2,23 +2,19 @@ import {
     Text,
     View,
     StyleSheet,
-    Button,
-    Alert,
     TextInput,
-    TouchableWithoutFeedback,
     Keyboard,
-    StatusBar,
     useColorScheme, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform
 } from "react-native";
 import React, {useState} from "react";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import loginApi from "@/services/authService";
 
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES, GLOBAL_STYLES } from '@/styles/theme';
-import {router} from "expo-router";
+import { router } from "expo-router";
 import BackButton from "@/components/BackButton";
 import { useSession } from "@/context/AuthContext";
+import { GlassView } from "expo-glass-effect";
 
 export default function Login() {
     const { signIn } = useSession();
@@ -205,21 +201,29 @@ export default function Login() {
                     </View>
                 )}
 
-                <TouchableOpacity
-                    style={[
-                        GLOBAL_STYLES.primaryButton,
-                        GLOBAL_STYLES.shadow,
-                        isLoading && styles.buttonDisabled
-                    ]}
-                    onPress={ handleLogin }
-                    disabled={isLoading}
+                <GlassView
+                    isInteractive
+                    style={{
+                        borderRadius: SIZES.radius,
+                    }}
                 >
-                    {isLoading ? (
-                        <ActivityIndicator color="#1A1A1A" />
-                    ) : (
-                        <Text style={styles.loginButtonText}>Zaloguj się</Text>
-                    )}
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[
+                            GLOBAL_STYLES.primaryButton,
+                            GLOBAL_STYLES.shadow,
+                            isLoading && styles.buttonDisabled
+                        ]}
+                        onPress={ handleLogin }
+                        activeOpacity={0.8}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <ActivityIndicator color="#1A1A1A" />
+                        ) : (
+                            <Text style={styles.loginButtonText}>Zaloguj się</Text>
+                        )}
+                    </TouchableOpacity>
+                </GlassView>
 
                 <View style={[styles.footer, { gap: 10 }]}>
                     <Text style={{ color: theme.textSecondary }}>Nie masz jeszcze konta?</Text>

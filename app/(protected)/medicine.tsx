@@ -16,8 +16,8 @@ export default function Medicine() {
                         Lista leków
                     </Text>
 
-                    <Text style={[styles.heading, { color: theme.text }]}>
-                        Recepty
+                    <Text style={[styles.description, { color: theme.text }]}>
+                        Tutaj możesz zapisywać
                     </Text>
 
                 </View>

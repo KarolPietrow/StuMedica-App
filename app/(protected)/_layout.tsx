@@ -17,7 +17,7 @@ export default function TabLayout() {
             </NativeTabs.Trigger>
             <NativeTabs.Trigger name="medicine">
                 <Label>Leki</Label>
-                <Icon sf="calendar" />
+                <Icon sf="pills" />
             </NativeTabs.Trigger>
             <NativeTabs.Trigger name="account">
                 <Label>Konto</Label>

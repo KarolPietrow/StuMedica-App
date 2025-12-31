@@ -1,14 +1,15 @@
 // npx expo start
 // npx expo run:android --no-build-cache --device
 // npx expo export --platform web
+// expo run:ios --device --configuration Release
 
-import {Text, View, StyleSheet, Button, useColorScheme, TouchableOpacity, StatusBar, ScrollView} from "react-native";
+import {Text, View, StyleSheet, useColorScheme, TouchableOpacity, ScrollView} from "react-native";
 import { COLORS, GLOBAL_STYLES, SIZES } from "@/styles/theme";
 import { useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import {SafeAreaView} from "react-native-safe-area-context";
 import React from 'react'
-import {GlassView} from "expo-glass-effect";
+import { GlassView } from "expo-glass-effect";
 
 
 export default function Index() {

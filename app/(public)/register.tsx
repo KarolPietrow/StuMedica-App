@@ -1,5 +1,4 @@
 import {
-    Button,
     StyleSheet,
     Text, TextInput,
     TouchableOpacity,
@@ -9,7 +8,7 @@ import {
 import { Checkbox } from 'expo-checkbox';
 import React, { useState } from "react";
 
-import {router, useRouter} from "expo-router";
+import { router, useRouter } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
 
 import { COLORS, SIZES, GLOBAL_STYLES } from '@/styles/theme';
@@ -17,7 +16,7 @@ import BackButton from "@/components/BackButton";
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { registerApi } from "@/services/authService";
-
+import { GlassView } from "expo-glass-effect";
 
 
 export default function Register() {
@@ -286,21 +285,29 @@ export default function Register() {
                             </View>
                         )}
 
-                        <TouchableOpacity
-                            style={[
-                                GLOBAL_STYLES.primaryButton,
-                                GLOBAL_STYLES.shadow,
-                                (isLoading || !isChecked) && styles.buttonDisabled
-                            ]}
-                            onPress={handleRegister}
-                            disabled={isLoading}
+                        <GlassView
+                            isInteractive
+                            style={{
+                                borderRadius: SIZES.radius,
+                            }}
                         >
-                            {isLoading ? (
-                                <ActivityIndicator color="#1A1A1A" />
-                            ) : (
-                                <Text style={styles.buttonText}>Zarejestruj się</Text>
-                            )}
-                        </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[
+                                    GLOBAL_STYLES.primaryButton,
+                                    GLOBAL_STYLES.shadow,
+                                    (isLoading || !isChecked) && styles.buttonDisabled
+                                ]}
+                                onPress={handleRegister}
+                                disabled={isLoading}
+                                activeOpacity={0.8}
+                            >
+                                {isLoading ? (
+                                    <ActivityIndicator color="#1A1A1A" />
+                                ) : (
+                                    <Text style={styles.buttonText}>Zarejestruj się</Text>
+                                )}
+                            </TouchableOpacity>
+                        </GlassView>
                     </View>
 
                     <View style={styles.footer}>

@@ -4,46 +4,32 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import React, {useEffect, useState} from "react";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {fetchWithAuth} from "@/services/authService";
+import {useSession} from "@/context/AuthContext";
 
 
 export default function Dashboard() {
     const colorScheme = useColorScheme();
     const theme = COLORS[colorScheme ?? 'light'];
 
-    const [userData, setUserData] = useState<any>(null);
-
-    useEffect(() => {
-        const getUserData = async () => {
-            try {
-                const res = await fetchWithAuth('/auth/me');
-                if (res.ok) {
-                    const data = await res.json();
-                    setUserData(data);
-                }
-            } catch (e) {
-                console.error("Błąd pobierania profilu", e);
-            }
-        };
-        getUserData();
-    }, []);
+    const { user, refreshUser, signOut } = useSession()
 
     return (
         // <SafeAreaView >
             <ScrollView style={[GLOBAL_STYLES.container, { backgroundColor: theme.background}]}>
                 <View style={[styles.contentContainer, {marginTop: 50}]}>
                     <View style={[styles.contentContainer, {alignItems: 'center'}]}>
-                        {userData && <Text style={[styles.heading, { color: theme.text }]}>
-                            Witaj, {userData.name}!
+                        {user && <Text style={[styles.heading, { color: theme.text }]}>
+                            Witaj, {user.name}!
                         </Text>}
                         <Text style={[styles.description, { color: theme.text}]}>
-                            Zaplanowane wizyty:
+                            Nadchodzące wizyty
                         </Text>
                         <Text style={[styles.description, { color: theme.text}]}>
-
+                            Przypomnienia o lekach
                         </Text>
 
                         <Text style={[styles.description, { color: theme.text}]}>
-                            Historia wizyt
+                            Inne
                         </Text>
                     </View>
                 </View>

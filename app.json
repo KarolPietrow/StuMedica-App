@@ -21,6 +21,7 @@
       "package": "pl.stumedica.stumedica_mobile"
     },
     "web": {
+      "lang": "pl",
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/stumedica-icon-1.png"
