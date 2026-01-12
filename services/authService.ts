@@ -2,7 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 import { Platform } from "react-native";
 
 const API_BASE = "https://api.stumedica.pl";
-// const API_BASE = "http://localhost:4000";
+// const API_BASE = "http://127.0.0.1:4000";
 
 const TOKEN_KEY = 'user_jwt_token';
 

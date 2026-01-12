@@ -9,16 +9,20 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "icon": "./assets/stumedica-icon-1.png",
       "supportsTablet": true,
       "bundleIdentifier": "pl.stumedica.stumedica-mobile"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#76e7a2",
-        "foregroundImage": "./assets/stumedica-icon-1-transparent.png"
+        "foregroundImage": "./assets/stumedica-icon-2-transparent.png"
       },
       "edgeToEdgeEnabled": true,
-      "package": "pl.stumedica.stumedica_mobile"
+      "package": "pl.stumedica.stumedica_mobile",
+      "permissions": [
+        "NOTIFICATIONS"
+      ]
     },
     "web": {
       "lang": "pl",
@@ -38,6 +42,14 @@
           "dark": {
             "backgroundColor": "#121212"
           }
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/stumedica-icon-1-transparent.png",
+          "color": "#ffffff",
+          "defaultChannel": "default"
         }
       ],
       "expo-web-browser"

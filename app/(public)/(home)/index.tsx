@@ -1,13 +1,25 @@
 // npx expo start
 // npx expo run:android --no-build-cache --device
 // npx expo export --platform web
+
+// Build na iOS:
+// npx expo prebuild --clean -p ios
 // expo run:ios --device --configuration Release
 
-import {Text, View, StyleSheet, useColorScheme, TouchableOpacity, ScrollView} from "react-native";
+// Build Android:
+// npx expo prebuild --clean -p android
+// expo run:android --device --variant release
+
+// Naprawa WatchMan:
+// watchman shutdown-server
+// watchman watch-del-all
+// expo start --clear
+
+import { Text, View, StyleSheet, useColorScheme, TouchableOpacity, ScrollView } from "react-native";
 import { COLORS, GLOBAL_STYLES, SIZES } from "@/styles/theme";
 import { useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import {SafeAreaView} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import React from 'react'
 import { GlassView } from "expo-glass-effect";
 

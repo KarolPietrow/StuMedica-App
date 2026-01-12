@@ -4,7 +4,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import React from "react";
 
 
-export default function Appointment() {
+export default function Medicine() {
     const colorScheme = useColorScheme();
     const theme = COLORS[colorScheme ?? 'light'];
 
@@ -13,7 +13,10 @@ export default function Appointment() {
             <View style={[styles.contentContainer, {marginTop: 50}]}>
                 <View style={styles.contentContainer}>
                     <Text style={[styles.heading, { color: theme.text }]}>
-                        Umów wizytę
+                        Lista leków
+                    </Text>
+                    <Text style={[styles.description, { color: theme.text }]}>
+                        COMING SOON
                     </Text>
                 </View>
             </View>
@@ -53,7 +56,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: 'center',
         lineHeight: 24,
-        maxWidth: '90%',
         marginBottom: 12,
     },
 });

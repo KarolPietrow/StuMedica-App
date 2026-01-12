@@ -1,4 +1,13 @@
-import {ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View} from "react-native";
+import {
+    ActivityIndicator,
+    Platform,
+    ScrollView,
+    StyleSheet, Switch,
+    Text,
+    TouchableOpacity,
+    useColorScheme,
+    View
+} from "react-native";
 import { COLORS, GLOBAL_STYLES, SIZES } from "@/styles/theme";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import React, { useState } from "react";
@@ -7,9 +16,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { GlassView } from "expo-glass-effect";
 
+import { useNotificationObserver } from "@/hooks/useNotificationObserver";
 
 export default function Account() {
     const { user, refreshUser, signOut } = useSession()
+
+    const isWeb = Platform.OS === 'web';
+
+    const { notificationsEnabled, isChecking, toggleNotifications } = useNotificationObserver();
 
     const colorScheme = useColorScheme();
     const theme = COLORS[colorScheme ?? 'light'];
@@ -55,32 +69,87 @@ export default function Account() {
         </View>
     );
 
-    const StatusRow = ({ label, isActive, activeText, inactiveText, icon, iconProvider, onPress }: any) => {
-        const statusColor = isActive ? '#4CD964' : theme.textSecondary; // Zielony jeśli aktywne, szary jeśli nie
+    const StatusRow = ({
+                           label,
+                           isActive, // Tu przekażemy wartość bool dla switcha
+                           activeText,
+                           inactiveText,
+                           icon,
+                           onPress, // Dla zwykłych wierszy (np. 2FA)
+                           isToggle = false, // Czy to ma być Switch?
+                           onToggle, // Funkcja zmiany switcha
+                           disabled = false,
+                           disabledText = "Tylko w aplikacji"
+                       }: any) => {
+        const statusColor = disabled
+            ? theme.textSecondary
+            : (isActive ? '#4CD964' : theme.textSecondary);
+
+        const displayText = disabled
+            ? disabledText
+            : (isActive ? activeText : inactiveText);
+
+        const containerOpacity = disabled ? 0.5 : 1;
+
+        // Kontener: Jeśli to Toggle, nie chcemy, żeby cały wiersz był klikalny tak samo jak przycisk
+        const Wrapper = isToggle ? View : TouchableOpacity;
 
         return (
-            <TouchableOpacity
-                style={[styles.rowContainer, { borderBottomColor: theme.border }]}
-                onPress={onPress}
+            <Wrapper
+                style={[styles.rowContainer, { borderBottomColor: theme.border, opacity: containerOpacity }]}
+                onPress={(!isToggle && !disabled) ? onPress : undefined}
+                disabled={disabled}
             >
                 <View style={styles.rowIconContainer}>
-                    {/* Obsługa różnych zestawów ikon (Ionicons ma loga w "logo-google" itp.) */}
                     <Ionicons name={icon} size={22} color={theme.textSecondary} />
                 </View>
+
                 <View style={styles.rowContent}>
                     <Text style={[styles.statusLabelName, { color: theme.text }]}>{label}</Text>
-                    <View style={styles.statusBadgeContainer}>
-                        <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-                        <Text style={[styles.statusText, { color: statusColor }]}>
-                            {isActive ? activeText : inactiveText}
-                        </Text>
+                    {/* Jeśli to Switch, ukrywamy kropkę i tekst statusu, bo Switch sam w sobie jest statusem */}
+                    {(!isToggle || isWeb) && (
+                        <View style={styles.statusBadgeContainer}>
+                            {!disabled && <View style={[styles.statusDot, { backgroundColor: statusColor }]} />}
+                            <Text style={[styles.statusText, { color: statusColor, fontStyle: disabled ? 'italic' : 'normal' }]}>
+                                {displayText}
+                            </Text>
+                        </View>
+                    )}
+                </View>
+
+                {/* PRAWA STRONA WIERSZA */}
+                {label === "Powiadomienia" && isChecking ? (
+                    <ActivityIndicator size="small" color={theme.primary} />
+                ) : (
+                    <View>
+                        {isToggle ? (
+                            <>
+                                {!disabled &&
+                                <Switch
+                                    trackColor={{false: theme.border, true: theme.primary}}
+                                    thumbColor={'#fff'}
+                                    ios_backgroundColor={theme.border}
+                                    onValueChange={onToggle}
+                                    value={isActive}
+                                    disabled={disabled}
+                                    style={Platform.select({
+                                        ios: {transform: [{scaleX: 0.8}, {scaleY: 0.8}]}
+                                    })}
+                                />
+                                }
+                                {disabled &&
+                                    <Ionicons name={"lock-closed-outline"} size={16} color={theme.textSecondary} />
+                                }
+                            </>
+                        ) : (
+                            <View style={[styles.chevronContainer, { backgroundColor: theme.surface }]}>
+                                {!disabled && <Text style={[styles.manageText, { color: theme.primary }]}>Zarządzaj</Text>}
+                                <Ionicons name={disabled ? "lock-closed-outline" : "chevron-forward"} size={16} color={disabled ? theme.textSecondary : theme.primary} />
+                            </View>
+                        )}
                     </View>
-                </View>
-                <View style={[styles.chevronContainer, { backgroundColor: theme.surface }]}>
-                    <Text style={[styles.manageText, { color: theme.primary }]}>Zarządzaj</Text>
-                    <Ionicons name="chevron-forward" size={16} color={theme.primary} />
-                </View>
-            </TouchableOpacity>
+                )}
+            </Wrapper>
         );
     };
 
@@ -99,6 +168,31 @@ export default function Account() {
         </TouchableOpacity>
     );
 
+    const AppDownloadBanner = () => {
+        if (!isWeb) return null;
+
+        return (
+            <View style={[styles.webBanner, { backgroundColor: theme.primary }]}>
+                <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', gap: 8}}>
+                        <Text style={styles.webBannerTitle}> Pobierz aplikację mobilną </Text>
+                        <Ionicons name="logo-android" size={22} />
+                        <Ionicons name="logo-apple" size={22} />
+                    </View>
+                    <Text style={styles.webBannerText}>
+                        Zyskaj dostęp do powiadomień o lekach i logowania biometrią.
+                    </Text>
+                </View>
+                <TouchableOpacity
+                    style={styles.webBannerButton}
+                    onPress={() => alert("[TODO] Przekierowanie do App Store / Google Play")}
+                >
+                    <Text style={[styles.webBannerButtonText]}>Pobierz</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    };
+
 
     if (!user) return null;
 
@@ -114,6 +208,8 @@ export default function Account() {
                     <Text style={[styles.badgeText, { color: theme.primary }]}>PACJENT</Text>
                 </View>
             </View>
+
+            <AppDownloadBanner />
 
             <View style={styles.section}>
                 <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Twoje Dane</Text>
@@ -139,12 +235,23 @@ export default function Account() {
                     {/* Powiadomienia */}
                     <StatusRow
                         label="Powiadomienia"
-                        isActive={securityState.notificationsEnabled}
-                        activeText="Włączone"
-                        inactiveText="Wyłączone"
                         icon="notifications-outline"
-                        onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
+
+                        isToggle={true}
+                        isActive={notificationsEnabled}
+                        onToggle={toggleNotifications}
+                        disabled={isWeb}
                     />
+                    { !isWeb && (
+                        <StatusRow
+                            label="TEST POWIADOMIENIA"
+                            isActive={false}
+                            activeText=""
+                            inactiveText="Wyślij testowe powiadomienie"
+                            icon=""
+                            onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
+                        />
+                    )}
 
                     {/* Motyw */}
                     <View style={{ overflow: 'hidden' }}>
@@ -185,6 +292,7 @@ export default function Account() {
                         inactiveText="Nie skonfigurowano"
                         icon="finger-print-outline"
                         onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
+                        disabled={isWeb}
                     />
                     <ActionRow
                         label="Zmień hasło"
@@ -437,4 +545,42 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: '600'
     },
+
+    webBanner: {
+        marginHorizontal: 20,
+        marginBottom: 24,
+        padding: 16,
+        borderRadius: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
+        // Lekki cień
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    webBannerTitle: {
+        // color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 4,
+    },
+    webBannerText: {
+        // color: 'rgba(255,255,255,0.9)',
+        fontSize: 13,
+        lineHeight: 18,
+    },
+    webBannerButton: {
+        backgroundColor: '#fff',
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        borderRadius: 10,
+    },
+    webBannerButtonText: {
+        fontWeight: 'bold',
+        fontSize: 13,
+    }
 });

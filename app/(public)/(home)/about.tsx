@@ -10,11 +10,11 @@ export default function About() {
     const theme = COLORS[colorScheme ?? 'light'];
 
     return (
-        <SafeAreaView style={[GLOBAL_STYLES.container, { backgroundColor: theme.background }]}>
-        <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-        >
+        <ScrollView style={[GLOBAL_STYLES.container, { backgroundColor: theme.background }]}>
+        {/*<ScrollView*/}
+        {/*    contentContainerStyle={styles.scrollContent}*/}
+        {/*    showsVerticalScrollIndicator={false}*/}
+        {/*>*/}
             <View style={styles.contentContainer}>
                 <View style={GLOBAL_STYLES.center}>
                     <View style={[styles.iconCircle, GLOBAL_STYLES.shadow]}>
@@ -60,7 +60,7 @@ export default function About() {
                 </Text>
             </View>
         </ScrollView>
-        </SafeAreaView>
+        // </SafeAreaView>
     );
 }
 
