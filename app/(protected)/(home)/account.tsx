@@ -17,6 +17,7 @@ import { router } from "expo-router";
 import { GlassView } from "expo-glass-effect";
 
 import { useNotificationObserver } from "@/hooks/useNotificationObserver";
+import {scheduleTestNotification} from "@/services/notificationService";
 
 export default function Account() {
     const { user, refreshUser, signOut } = useSession()
@@ -249,7 +250,7 @@ export default function Account() {
                             activeText=""
                             inactiveText="Wyślij testowe powiadomienie"
                             icon=""
-                            onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
+                            onPress={ scheduleTestNotification }
                         />
                     )}
 

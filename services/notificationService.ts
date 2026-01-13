@@ -37,11 +37,10 @@ export async function registerForPushNotificationsAsync() {
             finalStatus = status;
         }
 
-        if (finalStatus !== 'granted') {
-            return null; // Użytkownik odmówił
-        }
+        return finalStatus;
     } else {
         console.log('Must use physical device for Push Notifications');
+        return 'undefined';
     }
 }
 
@@ -49,4 +48,23 @@ export async function checkPermissionsStatus() {
     if (Platform.OS === 'web') return false;
     const { status } = await Notifications.getPermissionsAsync();
     return status === 'granted';
+}
+
+export async function scheduleTestNotification() {
+    if (Platform.OS === 'web') return;
+
+    await Notifications.scheduleNotificationAsync({
+        content: {
+            title: "Nadchodząca wizyta",
+            body: "Zbliża się Twoja umówiona wizyta w StuMedica! 🦆",
+            sound: true,
+
+            // data: { someData: 'goes here' }, // Opcjonalne dane
+        },
+        trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+            seconds: 10, // Czas w sekundach od teraz
+            repeats: false
+        },
+    });
 }

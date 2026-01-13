@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
         marginBottom: 12,
-        color: 'rgb(118 231 162)'
+        color: COLORS.light.primary
     },
     heading: {
         fontSize: 24,

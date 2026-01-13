@@ -18,10 +18,11 @@ export default function NotificationRequestScreen() {
     const colorScheme = useColorScheme();
     const theme = COLORS[colorScheme ?? 'light'];
 
-    const { toggleNotifications } = useNotificationObserver();
+    const { requestAndEnableNotifications } = useNotificationObserver();
 
     const handleEnable = async () => {
-        const success = await toggleNotifications(true);
+        const success = await requestAndEnableNotifications();
+
         if (success) {
             if (router.canGoBack()) {
                 router.back();

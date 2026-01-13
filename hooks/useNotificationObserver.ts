@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import {Alert, AppState, Linking, Platform} from 'react-native';
+import { Alert, AppState, Linking, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from "expo-router";
+import { registerForPushNotificationsAsync } from '@/services/notificationService';
 
 const PREFERENCE_KEY = 'user_notifications_enabled';
 
@@ -36,18 +38,7 @@ export function useNotificationObserver() {
         if (Platform.OS !== 'web') {
             if (newValue === true) {
                 if (!hasSystemPermission) {
-                    // TODO ZAIMPLEMENTOWAĆ ŁADNY EKRAN
-
-                    Alert.alert(
-                        "Brak uprawnień",
-                        "Aby włączyć powiadomienia, musisz zezwolić na nie w ustawieniach systemu.",
-                        [
-                            {text: "Anuluj", style: "cancel"},
-                            {text: "Ustawienia", onPress: () => Linking.openSettings()}
-                        ]
-                    );
-                    return false;
-
+                    router.push('/notification-request')
                 } else {
                     // Jest zgoda systemowa - włączamy powiadomienia bez request uprawnień
                     setNotificationsEnabled(true);
@@ -60,6 +51,32 @@ export function useNotificationObserver() {
                 await AsyncStorage.setItem(PREFERENCE_KEY, 'false');
                 return true;
             }
+        }
+    };
+
+    const requestAndEnableNotifications = async () => {
+        if (Platform.OS === 'web') return false;
+
+        const status = await registerForPushNotificationsAsync();
+
+        if (status === 'granted') {
+            setNotificationsEnabled(true);
+            setHasSystemPermission(true);
+            await AsyncStorage.setItem(PREFERENCE_KEY, 'true');
+            return true;
+        } else {
+            Alert.alert(
+                "Wymagane uprawnienia",
+                "Nie udzielono zgody na wysyłanie powiadomień. Przejdź do ustawień, aby włączyć powiadomienia.",
+                [
+                    { text: "Anuluj", style: "cancel" },
+                    {
+                        text: "Ustawienia",
+                        onPress: () => Linking.openSettings()
+                    }
+                ]
+            );
+            return false;
         }
     };
 
@@ -76,6 +93,7 @@ export function useNotificationObserver() {
     return {
         notificationsEnabled,
         isChecking,
-        toggleNotifications
+        toggleNotifications,
+        requestAndEnableNotifications
     };
 }

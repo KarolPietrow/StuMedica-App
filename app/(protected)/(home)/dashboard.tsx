@@ -27,7 +27,7 @@ const MOCK_NEXT_APPOINTMENT = {
     id: 101,
     doctorName: 'dr n. med. Anna Nowak',
     specialty: 'Kardiolog',
-    date: '14 Paź',
+    date: '28 Sty',
     time: '15:30',
     location: 'Gabinet 204, II Piętro',
     avatar: null // Tu mógłby być URL do zdjęcia lekarza
@@ -35,8 +35,8 @@ const MOCK_NEXT_APPOINTMENT = {
 
 const QUICK_ACTIONS = [
     { id: 1, label: 'Umów wizytę', icon: 'calendar-outline', route: '/appointments', color: '#4E8EF7' },
-    { id: 2, label: 'E-Recepty', icon: 'document-text-outline', route: '/prescriptions', color: '#11C193' },
-    { id: 3, label: 'Wyniki', icon: 'flask-outline', route: '/results', color: '#FF9500' },
+    { id: 2, label: 'Leki', icon: 'document-text-outline', route: '/prescriptions', color: '#11C193' },
+    { id: 3, label: 'Historia wizyt', icon: 'time-outline', route: '/results', color: '#FF9500' },
     { id: 4, label: 'Symptomy', icon: 'pulse-outline', route: '/symptoms', color: '#FF3B30' },
 ];
 
@@ -108,7 +108,7 @@ export default function Dashboard() {
                     </View>
                     <TouchableOpacity
                         style={[styles.profileButton, { backgroundColor: theme.surface }]}
-                        onPress={ signOut }
+                        onPress={ ()=>{ router.push('/account') }}
                     >
                         <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.primary }}>
                             {firstName[0]}
@@ -164,10 +164,10 @@ export default function Dashboard() {
                         >
                             {/* Lewa strona: Data */}
                             <View style={[styles.dateBox, { backgroundColor: `${theme.primary}15` }]}>
-                                <Text style={[styles.dateDay, { color: theme.primary }]}>
+                                <Text style={[styles.dateDay]}>
                                     {MOCK_NEXT_APPOINTMENT.date.split(' ')[0]}
                                 </Text>
-                                <Text style={[styles.dateMonth, { color: theme.primary }]}>
+                                <Text style={[styles.dateMonth]}>
                                     {MOCK_NEXT_APPOINTMENT.date.split(' ')[1]}
                                 </Text>
                             </View>
@@ -214,8 +214,8 @@ export default function Dashboard() {
                 {/* --- SEKCJA: BANER EDUKACYJNY / KARTA ZDROWIA --- */}
                 <View style={[styles.promoCard, { backgroundColor: '#4E8EF7' }]}>
                     <View style={{ flex: 1 }}>
-                        <Text style={styles.promoTitle}>Darmowe badania?</Text>
-                        <Text style={styles.promoText}>Sprawdź, czy kwalifikujesz się do programu profilaktyki 40+.</Text>
+                        <Text style={styles.promoTitle}>Zniżka studencka</Text>
+                        <Text style={styles.promoText}>Zweryfikuj status studenta i oszczędź do 50% na wybrane badania!</Text>
                         <TouchableOpacity style={styles.promoButton}>
                             <Text style={{ color: '#4E8EF7', fontWeight: 'bold', fontSize: 12 }}>Sprawdź szczegóły</Text>
                         </TouchableOpacity>

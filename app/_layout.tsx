@@ -104,29 +104,3 @@ function InitialLayout() {
         </ThemeProvider>
     )
 }
-
-const styles = StyleSheet.create({
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-    },
-    contentBox: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        maxWidth: 300,
-    },
-    errorTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginTop: 20,
-        marginBottom: 10,
-        textAlign: 'center',
-    },
-    errorText: {
-        fontSize: 14,
-        textAlign: 'center',
-        lineHeight: 20,
-    }
-});
