@@ -37,11 +37,11 @@ const QUICK_ACTIONS = [
     { id: 1, label: 'Umów wizytę', icon: 'calendar-outline', route: '/appointments', color: '#4E8EF7' },
     { id: 2, label: 'Leki', icon: 'document-text-outline', route: '/prescriptions', color: '#11C193' },
     { id: 3, label: 'Historia wizyt', icon: 'time-outline', route: '/results', color: '#FF9500' },
-    { id: 4, label: 'Symptomy', icon: 'pulse-outline', route: '/symptoms', color: '#FF3B30' },
+    { id: 4, label: 'Chatbot AI', icon: 'chatbubble-outline', route: '/symptoms', color: '#800080' },
 ];
 
 export default function Dashboard() {
-    const { user, signOut } = useSession();
+    const { user } = useSession();
     const colorScheme = useColorScheme();
     const theme = COLORS[colorScheme ?? 'light'];
 
