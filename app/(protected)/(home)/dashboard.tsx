@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useCallback, useState} from 'react';
 import {
     View,
     Text,
@@ -7,21 +7,23 @@ import {
     TouchableOpacity,
     Image,
     useColorScheme,
-    Dimensions
+    Dimensions, RefreshControl
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from "expo-router";
+import {router, useFocusEffect} from "expo-router";
 
 import { COLORS, GLOBAL_STYLES, SIZES } from '@/styles/theme';
 import { useSession } from '@/context/AuthContext';
+import {Medication, medicationService} from "@/services/medicationService";
 
-const MOCK_MEDICATIONS = [
-    { id: 1, name: 'Metformina', dose: '850mg', time: '08:00', taken: true, type: 'pill' },
-    { id: 2, name: 'Witamina D3', dose: '2000j', time: '08:00', taken: true, type: 'pill' },
-    { id: 3, name: 'Ibuprofen', dose: '400mg', time: '14:00', taken: false, type: 'capsule' },
-    { id: 4, name: 'Magnez', dose: '1 tabl.', time: '20:00', taken: false, type: 'pill' },
-];
+
+interface DoseTask {
+    uniqueId: string;
+    medication: Medication;
+    time: string;
+    isPast: boolean;
+}
 
 const MOCK_NEXT_APPOINTMENT = {
     id: 101,
@@ -33,19 +35,122 @@ const MOCK_NEXT_APPOINTMENT = {
     avatar: null // Tu mógłby być URL do zdjęcia lekarza
 };
 
-const QUICK_ACTIONS = [
-    { id: 1, label: 'Umów wizytę', icon: 'calendar-outline', route: '/appointments', color: '#4E8EF7' },
-    { id: 2, label: 'Leki', icon: 'document-text-outline', route: '/prescriptions', color: '#11C193' },
-    { id: 3, label: 'Historia wizyt', icon: 'time-outline', route: '/results', color: '#FF9500' },
-    { id: 4, label: 'Chatbot AI', icon: 'chatbubble-outline', route: '/symptoms', color: '#800080' },
-];
-
 export default function Dashboard() {
-    const { user } = useSession();
+    const { session, user } = useSession();
     const colorScheme = useColorScheme();
     const theme = COLORS[colorScheme ?? 'light'];
 
     const firstName = user?.name ? user.name.split(' ')[0] : 'Pacjencie';
+
+    const [todaysDoses, setTodaysDoses] = useState<DoseTask[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [nextDose, setNextDose] = useState<DoseTask | null>(null);
+
+    const processSchedule = (meds: Medication[]) => {
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+        const tasks: DoseTask[] = [];
+
+        meds.forEach(med => {
+            if (!med.is_active || !med.reminders || med.reminders.length === 0) return;
+
+            med.reminders.forEach(timeStr => {
+                const [h, m] = timeStr.split(':').map(Number);
+                const doseMinutes = h * 60 + m;
+
+                const isPast = currentMinutes >= doseMinutes;
+
+                tasks.push({
+                    uniqueId: `${med.id}-${timeStr}`,
+                    medication: med,
+                    time: timeStr,
+                    isPast: isPast
+                });
+            });
+        });
+
+        tasks.sort((a, b) => {
+            const [h1, m1] = a.time.split(':').map(Number);
+            const [h2, m2] = b.time.split(':').map(Number);
+            return (h1 * 60 + m1) - (h2 * 60 + m2);
+        });
+
+        setTodaysDoses(tasks);
+
+        const next = tasks.find(t => !t.isPast);
+        setNextDose(next || null);
+    };
+
+    const fetchData = async () => {
+        if (!session) return;
+        setIsLoading(true);
+        try {
+            const data = await medicationService.getAll(session);
+            processSchedule(data);
+        } catch (e) {
+            console.error("Błąd pobierania dashboardu", e);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchData();
+
+            const interval = setInterval(() => {
+                fetchData();
+            }, 60000);
+
+            return () => clearInterval(interval);
+        }, [session])
+    );
+
+    const renderDoseItem = (item: DoseTask) => {
+        const isTaken = item.isPast;
+
+        return (
+            <View key={item.uniqueId} style={[styles.doseCard, { backgroundColor: theme.surface }]}>
+                <View style={styles.timeColumn}>
+                    <Text style={[styles.doseTime, { color: isTaken ? theme.textSecondary : theme.text }]}>
+                        {item.time}
+                    </Text>
+                    <View style={[styles.timelineLine, { backgroundColor: theme.border }]} />
+                </View>
+
+                <View style={styles.doseInfo}>
+                    <Text style={[
+                        styles.doseName,
+                        { color: isTaken ? theme.textSecondary : theme.text, textDecorationLine: isTaken ? 'line-through' : 'none' }
+                    ]}>
+                        {item.medication.name}
+                    </Text>
+                    <Text style={[styles.doseDosage, { color: theme.textSecondary }]}>
+                        {item.medication.dosage}
+                    </Text>
+                </View>
+
+                <View style={styles.statusColumn}>
+                    {isTaken ? (
+                        <View style={[styles.statusIcon, { backgroundColor: '#4CD964' }]}>
+                            <Ionicons name="checkmark" size={16} color="#FFF" />
+                        </View>
+                    ) : (
+                        <View style={[styles.statusIcon, { backgroundColor: theme.background, borderWidth: 2, borderColor: theme.border }]}>
+                        </View>
+                    )}
+                </View>
+            </View>
+        );
+    };
+
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return "Dzień dobry,";
+        if (hour < 18) return "Miłego popołudnia,";
+        return "Dobry wieczór,";
+    };
 
     const SectionHeader = ({ title, actionLabel, onAction }: any) => (
         <View style={styles.sectionHeader}>
@@ -60,50 +165,74 @@ export default function Dashboard() {
         </View>
     );
 
-    const MedicationItem = ({ item }: any) => {
-        const statusColor = item.taken ? theme.primary : theme.textSecondary;
-        const bgColor = item.taken ? `${theme.primary}20` : theme.surface;
-
+    const QuickActions = () => {
         return (
-            <TouchableOpacity style={[styles.medicationCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                <View style={[styles.medicationTimeBadge, { backgroundColor: item.taken ? statusColor : theme.border }]}>
-                    <Text style={[styles.medicationTimeText, { color: item.taken ? '#fff' : theme.textSecondary }]}>
-                        {item.time}
-                    </Text>
-                </View>
-
-                <View style={styles.medicationIconWrapper}>
-                    <Ionicons
-                        name={item.taken ? "checkmark-circle" : "medical"}
-                        size={28}
-                        color={item.taken ? theme.primary : theme.textSecondary}
-                    />
-                </View>
-
-                <View style={{ marginTop: 8 }}>
-                    <Text style={[styles.medicationName, { color: item.taken ? theme.textSecondary : theme.text }]} numberOfLines={1}>
-                        {item.name}
-                    </Text>
-                    <Text style={{ fontSize: 12, color: theme.textSecondary }}>{item.dose}</Text>
-                </View>
-            </TouchableOpacity>
-        );
-    };
+            <View style={styles.quickActionsContainer}>
+                    <TouchableOpacity
+                        key={1}
+                        style={styles.actionButton}
+                        onPress={() => { router.push('/appointments')}}
+                    >
+                        <View style={[styles.actionIconCircle, { backgroundColor: `#4E8EF715` }]}>
+                            <Ionicons name={'calendar-outline'} size={24} color={'#4E8EF7'} />
+                        </View>
+                        <Text style={[styles.actionLabel, { color: theme.text }]}>{'Umów wizytę'}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        key={2}
+                        style={styles.actionButton}
+                        onPress={() => { router.push('/medicine')}}
+                    >
+                        <View style={[styles.actionIconCircle, { backgroundColor: `#11C19315` }]}>
+                            <Ionicons name={'document-text-outline'} size={24} color={'#11C193'} />
+                        </View>
+                        <Text style={[styles.actionLabel, { color: theme.text }]}>{'Leki'}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        key={3}
+                        style={styles.actionButton}
+                        onPress={() => { router.push('/appointments')}}
+                    >
+                        <View style={[styles.actionIconCircle, { backgroundColor: `#FF950015` }]}>
+                            <Ionicons name={'time-outline'} size={24} color={'#FF9500'} />
+                        </View>
+                        <Text style={[styles.actionLabel, { color: theme.text }]}>{'Historia wizyt'}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        key={4}
+                        style={styles.actionButton}
+                        onPress={() => { router.push('/chat')}}
+                    >
+                        <View style={[styles.actionIconCircle, { backgroundColor: `#80008015` }]}>
+                            {/*<Ionicons name={'chatbubble-outline'} size={24} color={'#800080'} />*/}
+                            <Ionicons name={'sparkles-outline'} size={24} color={'#800080'} />
+                        </View>
+                        <Text style={[styles.actionLabel, { color: theme.text }]}>{'Asystent AI'}</Text>
+                    </TouchableOpacity>
+            </View>
+        )
+    }
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <SafeAreaView
+            style={[GLOBAL_STYLES.container, { backgroundColor: theme.background }]}
+            edges={['right', 'left', 'top']
+        }>
             <ScrollView
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 100 }}
+                // contentContainerStyle={{ paddingBottom: 100 }}
+                refreshControl={
+                    <RefreshControl refreshing={isLoading} onRefresh={fetchData} tintColor={theme.primary} />
+                }
             >
                 {/* --- HEADER: POWITANIE --- */}
                 <View style={styles.header}>
                     <View>
                         <Text style={[styles.greetingSub, { color: theme.textSecondary }]}>
-                            Dzień dobry,
+                            {getGreeting()}
                         </Text>
                         <Text style={[styles.greetingName, { color: theme.text }]}>
-                            {firstName}! 👋
+                            {firstName}!
                         </Text>
                     </View>
                     <TouchableOpacity
@@ -116,40 +245,34 @@ export default function Dashboard() {
                     </TouchableOpacity>
                 </View>
 
-                <View style={styles.quickActionsContainer}>
-                    {QUICK_ACTIONS.map((action) => (
-                        <TouchableOpacity
-                            key={action.id}
-                            style={styles.actionButton}
-                            onPress={() => {
-                                // router.push(action.route);
-                                alert(`Kliknięto: ${action.label}`)
-                            }}
-                        >
-                            <View style={[styles.actionIconCircle, { backgroundColor: `${action.color}15` }]}>
-                                <Ionicons name={action.icon as any} size={24} color={action.color} />
-                            </View>
-                            <Text style={[styles.actionLabel, { color: theme.text }]}>{action.label}</Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
+                <QuickActions/>
 
-                {/* --- SEKCJA: LEKI NA DZIŚ --- */}
+                {/* --- SEKCJA NAJBLIŻSZEJ DAWKI --- */}
                 <View style={styles.sectionContainer}>
-                    <SectionHeader
-                        title="Twój plan na dziś"
-                        actionLabel="Zobacz wszystkie"
-                        onAction={() => router.push('/medicine')}
-                    />
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}
+                    <SectionHeader title="Najbliższa dawka" />
+                    {nextDose ? (
+                    <TouchableOpacity
+                        style={[styles.heroCard, { backgroundColor: theme.primary }]}
+                        activeOpacity={0.7}
+                        onPress={() => router.push('/medicine')}
                     >
-                        {MOCK_MEDICATIONS.map((med) => (
-                            <MedicationItem key={med.id} item={med} />
-                        ))}
-                    </ScrollView>
+                        <View>
+                            <Text style={[styles.heroLabel, { color: theme.background}]}>Najbliższa dawka</Text>
+                            <Text style={[styles.heroTime, { color: theme.background}]}>{nextDose.time}</Text>
+                            <Text style={[styles.heroName, { color: theme.background}]}>{nextDose.medication.name}</Text>
+                            <Text style={[styles.heroDosage, { color: theme.background}]}>{nextDose.medication.dosage}</Text>
+                        </View>
+                        <Ionicons name="alarm" size={48} color="rgba(255,255,255,0.2)" />
+                    </TouchableOpacity>
+                ) : (
+                    <View style={[styles.heroCard, { backgroundColor: theme.surface }]}>
+                        <View>
+                            <Text style={[styles.heroLabel, { color: theme.textSecondary }]}>Na dzisiaj to wszystko</Text>
+                            <Text style={[styles.heroName, { color: theme.text, marginTop: 4 }]}>Wszystkie leki wzięte</Text>
+                        </View>
+                        <Ionicons name="checkmark-circle" size={48} color="#4CD964" />
+                    </View>
+                )}
                 </View>
 
                 {/* --- SEKCJA: NADCHODZĄCA WIZYTA --- */}
@@ -164,10 +287,10 @@ export default function Dashboard() {
                         >
                             {/* Lewa strona: Data */}
                             <View style={[styles.dateBox, { backgroundColor: `${theme.primary}15` }]}>
-                                <Text style={[styles.dateDay]}>
+                                <Text style={[styles.dateDay, { color: theme.background}]}>
                                     {MOCK_NEXT_APPOINTMENT.date.split(' ')[0]}
                                 </Text>
-                                <Text style={[styles.dateMonth]}>
+                                <Text style={[styles.dateMonth, { color: theme.background}]}>
                                     {MOCK_NEXT_APPOINTMENT.date.split(' ')[1]}
                                 </Text>
                             </View>
@@ -229,9 +352,6 @@ export default function Dashboard() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -414,5 +534,94 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         borderRadius: 8,
         alignSelf: 'flex-start',
+    },
+    heroCard: {
+        marginHorizontal: 20,
+        borderRadius: 20,
+        padding: 24,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        // marginBottom: 24,
+        // Cień
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+    heroLabel: {
+        color: 'rgba(255,255,255,0.8)',
+        fontSize: 12,
+        fontWeight: '600',
+        textTransform: 'uppercase',
+        marginBottom: 8,
+    },
+    heroTime: {
+        color: '#FFF',
+        fontSize: 32,
+        fontWeight: 'bold',
+        marginBottom: 4,
+    },
+    heroName: {
+        color: '#FFF',
+        fontSize: 18,
+        fontWeight: '600',
+    },
+    heroDosage: {
+        color: 'rgba(255,255,255,0.9)',
+        fontSize: 14,
+    },
+
+    // Timeline / Dose List
+    timelineContainer: {
+        paddingHorizontal: 20,
+        gap: 12,
+    },
+    doseCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        borderRadius: 16,
+    },
+    timeColumn: {
+        alignItems: 'center',
+        marginRight: 16,
+        width: 50,
+    },
+    doseTime: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 4,
+    },
+    timelineLine: {
+        width: 2,
+        height: 20, // krótka linia dekoracyjna
+        borderRadius: 1,
+    },
+    doseInfo: {
+        flex: 1,
+    },
+    doseName: {
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    doseDosage: {
+        fontSize: 13,
+    },
+    statusColumn: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    statusIcon: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emptyState: {
+        alignItems: 'center',
+        marginTop: 20,
     }
 });

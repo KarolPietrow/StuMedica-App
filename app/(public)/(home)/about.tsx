@@ -10,57 +10,65 @@ export default function About() {
     const theme = COLORS[colorScheme ?? 'light'];
 
     return (
-        <ScrollView style={[GLOBAL_STYLES.container, { backgroundColor: theme.background }]}>
-        {/*<ScrollView*/}
-        {/*    contentContainerStyle={styles.scrollContent}*/}
-        {/*    showsVerticalScrollIndicator={false}*/}
-        {/*>*/}
-            <View style={styles.contentContainer}>
-                <View style={GLOBAL_STYLES.center}>
-                    <View style={[styles.iconCircle, GLOBAL_STYLES.shadow]}>
-                        <FontAwesome name="plus" size={48} color={theme.background} />
+        <SafeAreaView style={[GLOBAL_STYLES.container, { backgroundColor: theme.background }]}>
+            <View style={[GLOBAL_STYLES.container, { backgroundColor: theme.background }]}>
+
+                <ScrollView style={[GLOBAL_STYLES.container, { backgroundColor: theme.background }]}>
+                    <View style={styles.contentContainer}>
+                        <View style={GLOBAL_STYLES.center}>
+                            <View style={[styles.iconCircle, GLOBAL_STYLES.shadow]}>
+                                <FontAwesome name="plus" size={48} color={theme.background} />
+                            </View>
+                            <Text style={[styles.titleText]}>StuMedica</Text>
+                        </View>
+
+                        <View style={GLOBAL_STYLES.center}>
+                            <Text style={[styles.heading, { color: theme.text }]}>
+                                System rejestracji medycznej dla pacjentów 💖
+                            </Text>
+                            <Text style={[styles.description, { color: theme.text }]}>
+                                StuMedica to elektroniczny system rejestracji medycznej, który umożliwia pacjentom łatwą rejestrację na wizyty lekarskie.
+                            </Text>
+                            <Text style={[styles.description, { color: theme.text }]}>
+                                Pacjent może wybrać dogodny termin wizyty w kalendarzu, oraz od razu ją opłacić.
+                            </Text>
+                            <Text style={[styles.description, { color: theme.text }]}>
+                                Dostępna jest też wirtualna apteczka, która umożliwia dodawanie leków, wraz z dawką oraz harmonogramem. Lista jest synchronizowana z serwerem, więc jest dostępna na każdym urządzeniu - wystarczy się zalogować.
+                            </Text>
+                            <Text style={[styles.description, { color: theme.text }]}>
+                                Aplikacja umożliwia wysyłanie powiadomień w celu przypomnienia o wzięciu leków, oraz o nadchodzącej wizycie lekarskiej.
+                            </Text>
+                            <Text style={[styles.description, { color: theme.text }]}>
+                                Dostępna jest aplikacja webowa w przeglądarce (stumedica.pl), oraz aplikacja mobilna na urządzenia iOS oraz Android.
+                            </Text>
+                            <Text style={[styles.description, { color: theme.text }]}>
+                                Aplikacja została napisana w React Native (Expo&nbsp;54). Serwer został napisany w Pythonie (SQLite,&nbsp;FastAPI)
+                            </Text>
+                        </View>
                     </View>
-                    <Text style={[styles.titleText]}>StuMedica</Text>
-                </View>
 
-                <View style={GLOBAL_STYLES.center}>
-                    <Text style={[styles.heading, { color: theme.text }]}>
-                        System rejestracji medycznej dla pacjentów 💖 🦆
-                    </Text>
-                    <Text style={[styles.description, { color: theme.text }]}>
-                        StuMedica to elektroniczny system rejestracji medycznej, który umożliwia pacjentom łatwą rejestrację na wizyty lekarskie.
-                    </Text>
-                    <Text style={[styles.description, { color: theme.text }]}>
-                        Pacjent może wybrać dogodny termin wizyty w kalendarzu, oraz od razu ją opłacić.
-                    </Text>
-                    <Text style={[styles.description, { color: theme.text }]}>
-                        Dostępna jest aplikacja webowa w przeglądarce (stumedica.pl), oraz aplikacja mobilna na urządzenia iOS oraz Android.
-                    </Text>
-                    <Text style={[styles.description, { color: theme.text }]}>
-                        Aplikacja została napisana w React Native (Expo&nbsp;54). Serwer został napisany w Pythonie (SQLite,&nbsp;FastAPI)
-                    </Text>
-                </View>
-            </View>
+                    <View style={GLOBAL_STYLES.center}>
+                        <Text style={[styles.heading, { color: theme.text }]}>
+                            Autorzy
+                        </Text>
+                        <Text style={[styles.description, { color: theme.text }]}>
+                            Karol Pietrów - frontend
+                        </Text>
+                        <Text style={[styles.description, { color: theme.text }]}>
+                            Wiktoria Powroźnik - frontend
+                        </Text>
+                        <Text style={[styles.description, { color: theme.text }]}>
+                            Patrycja Siczek - backend
+                        </Text>
+                        <Text style={[styles.description, { color: theme.text }]}>
+                            Angelina Szuszkiewicz - backend
+                        </Text>
+                    </View>
+                </ScrollView>
 
-            <View style={GLOBAL_STYLES.center}>
-                <Text style={[styles.heading, { color: theme.text }]}>
-                    Autorzy
-                </Text>
-                <Text style={[styles.description, { color: theme.text }]}>
-                    Karol Pietrów - frontend
-                </Text>
-                <Text style={[styles.description, { color: theme.text }]}>
-                    Wiktoria Powroźnik - frontend
-                </Text>
-                <Text style={[styles.description, { color: theme.text }]}>
-                    Patrycja Siczek - backend
-                </Text>
-                <Text style={[styles.description, { color: theme.text }]}>
-                    Angelina Szuszkiewicz - backend
-                </Text>
+
             </View>
-        </ScrollView>
-        // </SafeAreaView>
+        </SafeAreaView>
     );
 }
 

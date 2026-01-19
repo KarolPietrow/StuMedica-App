@@ -11,7 +11,8 @@
     "ios": {
       "icon": "./assets/stumedica-icon-1.png",
       "supportsTablet": true,
-      "bundleIdentifier": "pl.stumedica.stumedica-mobile"
+      "bundleIdentifier": "pl.stumedica.stumedica-mobile",
+      "NSFaceIDUsageDescription": "Umożliwia użycie Face ID w celu odblokowania aplikacji StuMedica."
     },
     "android": {
       "adaptiveIcon": {
@@ -53,7 +54,14 @@
         }
       ],
       "expo-web-browser",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Umożliwia użycie Face ID w celu odblokowania aplikacji StuMedica."
+        }
+      ]
+
     ],
     "experiments": {
       "typedRoutes": true,

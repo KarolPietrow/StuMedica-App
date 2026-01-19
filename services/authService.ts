@@ -1,5 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from "react-native";
+import {router} from "expo-router";
 
 const API_BASE = "https://api.stumedica.pl";
 // const API_BASE = "http://127.0.0.1:4000";
@@ -26,7 +27,7 @@ export async function removeToken() {
 }
 
 export default async function loginApi(email: string, password: string) {
-    const res = await fetch(`${API_BASE}/login`, {
+    const res = await fetch(`${API_BASE}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -81,9 +82,8 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
     });
 
     if (res.status === 401) {
+        console.log("Sesja wygasła (401) - wylogowywanie...");
         await removeToken();
-        // Tutaj opcjonalnie można rzucić specyficzny błąd, który AuthContext wyłapie
-        // aby przekierować na ekran logowania
         throw new Error("Unauthorized");
     }
     return res;
@@ -91,7 +91,7 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
 
 export async function logoutApi() {
     try {
-        await fetch(`${API_BASE}/logout`, {
+        await fetch(`${API_BASE}/auth/logout`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -99,14 +99,14 @@ export async function logoutApi() {
             credentials: 'include',
         });
     } catch (e) {
-        console.warn("Błąd podczas wylogowywania z serwera (możliwy brak sieci)", e);
+        console.warn("Błąd wylogowywania", e);
     } finally {
         await removeToken();
     }
 }
 
 export async function registerApi(name: string, email: string, password: string): Promise<boolean> {
-    const res = await fetch(`${API_BASE}/register`, {
+    const res = await fetch(`${API_BASE}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

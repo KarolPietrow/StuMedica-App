@@ -46,9 +46,9 @@ export function useNotificationObserver() {
                     return true;
                 }
             } else {
-                // Wyłączenie powiadomień
                 setNotificationsEnabled(false);
                 await AsyncStorage.setItem(PREFERENCE_KEY, 'false');
+                await Notifications.cancelAllScheduledNotificationsAsync();
                 return true;
             }
         }

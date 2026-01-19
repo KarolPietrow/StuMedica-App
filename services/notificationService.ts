@@ -2,6 +2,10 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 // import Constants from 'expo-constants';
 import { Platform } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Medication } from "@/services/medicationService";
+
+const PREFERENCE_KEY = 'user_notifications_enabled';
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -13,8 +17,6 @@ Notifications.setNotificationHandler({
 });
 
 export async function registerForPushNotificationsAsync() {
-    // let token;
-
     if (Platform.OS === 'web') {
         return null;
     }
@@ -67,4 +69,40 @@ export async function scheduleTestNotification() {
             repeats: false
         },
     });
+}
+
+export async function syncLocalNotifications(medications: Medication[]) {
+    if (Platform.OS === 'web') return;
+
+    await Notifications.cancelAllScheduledNotificationsAsync();
+
+    const isEnabled = await AsyncStorage.getItem(PREFERENCE_KEY);
+
+    if (isEnabled !== 'true') {
+        console.log("Powiadomienia wyłączone w ustawieniach aplikacji. Pominięto planowanie.");
+        return;
+    }
+
+    for (const med of medications) {
+        if (!med.reminders || med.reminders.length === 0) continue;
+
+        for (const timeStr of med.reminders) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+
+            await Notifications.scheduleNotificationAsync({
+                content: {
+                    title: `Czas na lek: ${med.name}`,
+                    body: `${med.dosage} ${med.note ? `\nNotatka: ${med.note}` : ''}`,
+                    sound: true,
+                    data: { medicationId: med.id },
+                },
+                trigger: {
+                    type: Notifications.SchedulableTriggerInputTypes.DAILY,
+                    hour: hours,
+                    minute: minutes,
+                },
+            });
+        }
+    }
+    console.log("Zsynchronizowano powiadomienia lokalne");
 }

@@ -8,7 +8,8 @@ import loginApi, {
     logoutApi
 } from '@/services/authService';
 import { router } from "expo-router";
-import {Platform} from "react-native";
+import { Platform } from "react-native";
+import {biometricService} from "@/services/biometricService";
 
 interface AuthContextType {
     signIn: (email: string, password: string) => Promise<void>;
@@ -50,9 +51,14 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
                 setUser(userData);
             } else {
                 setUser(null);
+                setSession(null);
             }
-        } catch (e) {
+        } catch (e: any) {
             console.log("Nie udało się odświeżyć danych użytkownika", e);
+            if (e.message === 'Unauthorized' || e.message?.includes('401')) {
+                setSession(null);
+                setUser(null);
+            }
         }
     };
 
@@ -102,6 +108,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     const signOut = async () => {
         await removeToken();
         await logoutApi();
+        await biometricService.setBiometricEnabled(false);
         setSession(null);
         setUser(null);
         router.replace('/(public)/(home)');

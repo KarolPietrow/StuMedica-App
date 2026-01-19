@@ -1,16 +1,24 @@
-import {Stack} from "expo-router";
+import { Stack } from "expo-router";
+import { BiometricGate } from "@/components/biometricGate";
 
 export default function TabLayout() {
+
     return (
-        <Stack>
-            <Stack.Screen
-                name="(home)"
-                options={{ headerShown: false }}
-            />
-            <Stack.Screen
-                name="notification-request"
-                options={{ headerShown: false }}
-            />
-        </Stack>
+        <BiometricGate>
+            <Stack>
+                <Stack.Screen
+                    name="(home)"
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="notification-request"
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="chat"
+                    options={{ headerShown: false }}
+                />
+            </Stack>
+        </BiometricGate>
     )
 }

@@ -1,5 +1,5 @@
 import {
-    ActivityIndicator,
+    ActivityIndicator, Alert,
     Platform,
     ScrollView,
     StyleSheet, Switch,
@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { COLORS, GLOBAL_STYLES, SIZES } from "@/styles/theme";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { useSession } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -18,6 +18,8 @@ import { GlassView } from "expo-glass-effect";
 
 import { useNotificationObserver } from "@/hooks/useNotificationObserver";
 import {scheduleTestNotification} from "@/services/notificationService";
+import {biometricService} from "@/services/biometricService";
+import {SafeAreaView} from "react-native-safe-area-context";
 
 export default function Account() {
     const { user, refreshUser, signOut } = useSession()
@@ -33,12 +35,44 @@ export default function Account() {
     const securityState = {
         is2FAEnabled: false,
         isPasskeyEnabled: false,
-        isBiometricEnabled: false,
+        // isBiometricEnabled: false,
         isGoogleConnected: false,
         isAppleConnected: false,
 
-        notificationsEnabled: false,
+        // notificationsEnabled: false,
         currentTheme: true
+    };
+
+    const [isBiometricEnabled, setIsBiometricEnabled] = useState(false);
+    const [isSupported, setIsSupported] = useState(false);
+
+    useEffect(() => {
+        checkBiometrics();
+    }, []);
+
+    const checkBiometrics = async () => {
+        const supported = await biometricService.isHardwareAvailable();
+        setIsSupported(supported);
+
+        if (supported) {
+            const enabled = await biometricService.isBiometricEnabled();
+            setIsBiometricEnabled(enabled);
+        }
+    };
+
+    const toggleBiometrics = async (value: boolean) => {
+        if (value) {
+            const result = await biometricService.authenticate();
+            if (result.success) {
+                await biometricService.setBiometricEnabled(true);
+                setIsBiometricEnabled(true);
+            } else {
+                Alert.alert("Błąd", "Nie udało się zweryfikować tożsamości. Funkcja nie została włączona.");
+            }
+        } else {
+            await biometricService.setBiometricEnabled(false);
+            setIsBiometricEnabled(false);
+        }
     };
 
     const getInitials = (name: string) => {
@@ -198,182 +232,180 @@ export default function Account() {
     if (!user) return null;
 
     return (
-        <ScrollView style={[GLOBAL_STYLES.container, { backgroundColor: theme.background }]}>
-            <View style={styles.header}>
-                <View style={[styles.avatar, { backgroundColor: theme.primary }]}>
-                    <Text style={styles.avatarText}>{getInitials(user.name)}</Text>
+        <SafeAreaView
+            style={[GLOBAL_STYLES.container, { backgroundColor: theme.background }]}
+            edges={['right', 'left', 'top']
+        }>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+            >
+                <View style={styles.header}>
+                    <View style={[styles.avatar, { backgroundColor: theme.primary }]}>
+                        <Text style={styles.avatarText}>{getInitials(user.name)}</Text>
+                    </View>
+                    <Text style={[styles.userName, { color: theme.text }]}>{user.name}</Text>
+                    <Text style={[styles.userEmail, { color: theme.textSecondary }]}>{user.email}</Text>
+                    <View style={[styles.badge, { borderColor: theme.primary }]}>
+                        <Text style={[styles.badgeText, { color: theme.primary }]}>PACJENT</Text>
+                    </View>
                 </View>
-                <Text style={[styles.userName, { color: theme.text }]}>{user.name}</Text>
-                <Text style={[styles.userEmail, { color: theme.textSecondary }]}>{user.email}</Text>
-                <View style={[styles.badge, { borderColor: theme.primary }]}>
-                    <Text style={[styles.badgeText, { color: theme.primary }]}>PACJENT</Text>
-                </View>
-            </View>
 
-            <AppDownloadBanner />
+                <AppDownloadBanner />
 
-            <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Twoje Dane</Text>
-                <View style={[styles.card, { backgroundColor: theme.surface }]}>
-                    <InfoRow
-                        label="Imię i nazwisko"
-                        value={user.name}
-                        icon="person-outline"
-                        onEdit={() => alert("[TODO] Jeszcze nie zaimplementowane")}
-                    />
-                    <InfoRow
-                        label="Adres email"
-                        value={user.email}
-                        icon="mail-outline"
-                        onEdit={() => alert("[TODO] Jeszcze nie zaimplementowane")}
-                    />
-                </View>
-            </View>
-
-            <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Ustawienia aplikacji</Text>
-                <View style={[styles.card, { backgroundColor: theme.surface }]}>
-                    {/* Powiadomienia */}
-                    <StatusRow
-                        label="Powiadomienia"
-                        icon="notifications-outline"
-
-                        isToggle={true}
-                        isActive={notificationsEnabled}
-                        onToggle={toggleNotifications}
-                        disabled={isWeb}
-                    />
-                    { !isWeb && (
-                        <StatusRow
-                            label="TEST POWIADOMIENIA"
-                            isActive={false}
-                            activeText=""
-                            inactiveText="Wyślij testowe powiadomienie"
-                            icon=""
-                            onPress={ scheduleTestNotification }
+                <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Twoje Dane</Text>
+                    <View style={[styles.card, { backgroundColor: theme.surface }]}>
+                        <InfoRow
+                            label="Imię i nazwisko"
+                            value={user.name}
+                            icon="person-outline"
+                            onEdit={() => alert("[TODO] Jeszcze nie zaimplementowane")}
                         />
-                    )}
+                        <InfoRow
+                            label="Adres email"
+                            value={user.email}
+                            icon="mail-outline"
+                            onEdit={() => alert("[TODO] Jeszcze nie zaimplementowane")}
+                        />
+                    </View>
+                </View>
 
-                    {/* Motyw */}
-                    <View style={{ overflow: 'hidden' }}>
+                <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Ustawienia aplikacji</Text>
+                    <View style={[styles.card, { backgroundColor: theme.surface }]}>
+                        {/* Powiadomienia */}
+                        <StatusRow
+                            label="Powiadomienia"
+                            icon="notifications-outline"
+
+                            isToggle={true}
+                            isActive={notificationsEnabled}
+                            onToggle={toggleNotifications}
+                            disabled={isWeb}
+                        />
+
+                        {/* Motyw */}
+                        <View style={{ overflow: 'hidden' }}>
+                            <ActionRow
+                                label="Motyw aplikacji"
+                                value={securityState.currentTheme}
+                                icon="moon-outline"
+                                color="#5856D6" // Fioletowy dla motywu
+                                onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
+                            />
+                        </View>
+                    </View>
+                </View>
+
+                <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Bezpieczeństwo</Text>
+                    <View style={[styles.card, { backgroundColor: theme.surface, paddingVertical: 0 }]}>
+                        {isSupported && (
+                            <StatusRow
+                                isToggle={true}
+                                label="Logowanie biometrią"
+                                isActive={isBiometricEnabled}
+                                activeText="Włączone"
+                                inactiveText="Wyłączone"
+                                icon="finger-print-outline"
+                                onToggle={ toggleBiometrics }
+                                disabled={isWeb}
+                            />)}
+                        <StatusRow
+                            label="Weryfikacja dwuetapowa (2FA)"
+                            isActive={securityState.is2FAEnabled}
+                            activeText="Aktywna"
+                            inactiveText="Wyłączona"
+                            icon="shield-checkmark-outline"
+                            onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
+                        />
+                        <StatusRow
+                            label="Klucz dostępu (Passkey)"
+                            isActive={securityState.isPasskeyEnabled}
+                            activeText="Skonfigurowano"
+                            inactiveText="Nie skonfigurowano"
+                            icon="key"
+                            onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
+                        />
                         <ActionRow
-                            label="Motyw aplikacji"
-                            value={securityState.currentTheme}
-                            icon="moon-outline"
-                            color="#5856D6" // Fioletowy dla motywu
+                            label="Zmień hasło"
+                            icon="lock-closed-outline"
+                            onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
+                        />
+                        <ActionRow
+                            label="Usuwanie konta"
+                            icon="warning-outline"
+                            color="#007AFF"
                             onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
                         />
                     </View>
                 </View>
-            </View>
 
-            <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Bezpieczeństwo</Text>
-                <View style={[styles.card, { backgroundColor: theme.surface, paddingVertical: 0 }]}>
-                    <StatusRow
-                        label="Weryfikacja dwuetapowa (2FA)"
-                        isActive={securityState.is2FAEnabled}
-                        activeText="Aktywna"
-                        inactiveText="Wyłączona"
-                        icon="shield-checkmark-outline"
-                        onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
-                    />
-                    <StatusRow
-                        label="Klucz dostępu (Passkey)"
-                        isActive={securityState.isPasskeyEnabled}
-                        activeText="Skonfigurowano"
-                        inactiveText="Nie skonfigurowano"
-                        icon="key"
-                        onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
-                    />
-                    <StatusRow
-                        label="Logowanie biometrią"
-                        isActive={securityState.isBiometricEnabled}
-                        activeText="Skonfigurowano"
-                        inactiveText="Nie skonfigurowano"
-                        icon="finger-print-outline"
-                        onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
-                        disabled={isWeb}
-                    />
-                    <ActionRow
-                        label="Zmień hasło"
-                        icon="lock-closed-outline"
-                        onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
-                    />
-                    <ActionRow
-                        label="Usuwanie konta"
-                        icon="warning-outline"
+                <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Połączone konta</Text>
+                    <View style={[styles.card, { backgroundColor: theme.surface }]}>
+                        <StatusRow
+                            label="Konto Google"
+                            isActive={securityState.isGoogleConnected}
+                            activeText="Połączono"
+                            inactiveText="Nie połączono"
+                            icon="logo-google"
+                            onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
+                        />
+                        <StatusRow
+                            label="Konto Apple"
+                            isActive={securityState.isAppleConnected}
+                            activeText="Połączono"
+                            inactiveText="Nie połączono"
+                            icon="logo-apple"
+                            onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
+                        />
+                    </View>
+                </View>
+
+                <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Informacje i pomoc</Text>
+                    <View style={[styles.card, { backgroundColor: theme.surface }]}>
+                        <ActionRow
+                            label="Regulamin StuMedica"
+                            icon="document-text-outline"
+                            color="#FF9500" // Pomarańczowy
+                            onPress={() => router.push('/terms-of-service')}
+                        />
+                        <ActionRow
+                        label="Kontakt z nami"
+                        icon="mail-outline"
                         color="#007AFF"
                         onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
-                    />
+                        />
+                        <ActionRow
+                            label="Informacje o aplikacji"
+                            icon="information-circle-outline"
+                            color="#007AFF"
+                            onPress={() => router.push('/aboutMain')}
+                        />
+                    </View>
                 </View>
-            </View>
 
-            <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Połączone konta</Text>
-                <View style={[styles.card, { backgroundColor: theme.surface }]}>
-                    <StatusRow
-                        label="Konto Google"
-                        isActive={securityState.isGoogleConnected}
-                        activeText="Połączono"
-                        inactiveText="Nie połączono"
-                        icon="logo-google"
-                        onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
-                    />
-                    <StatusRow
-                        label="Konto Apple"
-                        isActive={securityState.isAppleConnected}
-                        activeText="Połączono"
-                        inactiveText="Nie połączono"
-                        icon="logo-apple"
-                        onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
-                    />
-                </View>
-            </View>
-
-            <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Informacje i pomoc</Text>
-                <View style={[styles.card, { backgroundColor: theme.surface }]}>
-                    <ActionRow
-                        label="Regulamin StuMedica"
-                        icon="document-text-outline"
-                        color="#FF9500" // Pomarańczowy
-                        onPress={() => router.push('/terms-of-service')}
-                    />
-                    <ActionRow
-                    label="Kontakt z nami"
-                    icon="mail-outline"
-                    color="#007AFF"
-                    onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
-                    />
-                    <ActionRow
-                        label="Informacje o aplikacji"
-                        icon="information-circle-outline"
-                        color="#007AFF"
-                        onPress={() => alert("🦆")}
-                    />
-                </View>
-            </View>
-
-            <View style={[styles.section, { marginTop: 20 }]}>
-                <GlassView
-                    isInteractive
-                    style={{
-                        borderRadius: SIZES.radius,
-                    }}
-                >
-                    <TouchableOpacity
-                        style={[styles.logoutButton, { borderColor: theme.error, backgroundColor: theme.background }]}
-                        onPress={signOut}
-                        activeOpacity={0.8}
+                <View style={[styles.section, { marginTop: 20 }]}>
+                    <GlassView
+                        isInteractive
+                        style={{
+                            borderRadius: SIZES.radius,
+                        }}
                     >
-                        <Ionicons name="log-out-outline" size={20} color={theme.error} />
-                        <Text style={[styles.logoutText, { color: theme.error }]}>Wyloguj się</Text>
-                    </TouchableOpacity>
-                </GlassView>
-            </View>
-
+                        <TouchableOpacity
+                            style={[styles.logoutButton, { borderColor: theme.error, backgroundColor: theme.background }]}
+                            onPress={signOut}
+                            activeOpacity={0.8}
+                        >
+                            <Ionicons name="log-out-outline" size={20} color={theme.error} />
+                            <Text style={[styles.logoutText, { color: theme.error }]}>Wyloguj się</Text>
+                        </TouchableOpacity>
+                    </GlassView>
+                </View>
         </ScrollView>
+        </SafeAreaView>
     );
 }
 
