@@ -9,82 +9,90 @@ import {
     KeyboardAvoidingView,
     Platform,
     useColorScheme,
-    Image,
+    ActivityIndicator,
+    Alert,
     Keyboard
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from "expo-router";
 
-import { COLORS, SIZES } from '@/styles/theme';
+import { COLORS } from '@/styles/theme';
+import { chatService } from '@/services/chatService'; // <--- IMPORT SERWISU
 
-const MOCK_MESSAGES = [
-    {
-        id: '1',
-        text: 'Dzień dobry! Jestem Twoim wirtualnym asystentem medycznym. W czym mogę Ci dzisiaj pomóc? Pamiętaj, że nie zastępuję porady lekarskiej.',
-        sender: 'ai',
-        timestamp: '10:00'
-    },
-    {
-        id: '2',
-        text: 'Chciałbym umówić wizytę do kardiologa.',
-        sender: 'user',
-        timestamp: '10:02'
-    },
-    {
-        id: '3',
-        text: 'Jasne, chętnie pomogę. Kiedy chciałbyś odbyć wizytę? Mam wolne terminy w przyszłym tygodniu.',
-        sender: 'ai',
-        timestamp: '10:02'
-    }
-];
+interface Message {
+    id: string;
+    text: string;
+    sender: 'user' | 'ai';
+    timestamp: string;
+}
+
+const WELCOME_MESSAGE: Message = {
+    id: 'init-1',
+    text: 'Dzień dobry! Jestem Twoim wirtualnym asystentem StuMedicAI. W czym mogę Ci dzisiaj pomóc? Pamiętaj, że nie zastępuję porady lekarskiej.',
+    sender: 'ai',
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+};
 
 const SUGGESTIONS = [
-    "Umów wizytę",
     "Moje leki",
-    "Wyniki badań",
-    "Boli mnie głowa"
+    "Dodaj leki",
+    "Następna wizyta",
+    "Umów wizytę"
 ];
 
 export default function ChatScreen() {
     const colorScheme = useColorScheme();
     const theme = COLORS[colorScheme ?? 'light'];
 
-    const [messages, setMessages] = useState(MOCK_MESSAGES);
+    const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
     const [inputText, setInputText] = useState('');
+    const [isTyping, setIsTyping] = useState(false); // <--- Stan ładowania
+
     const flatListRef = useRef<FlatList>(null);
 
     useEffect(() => {
         setTimeout(() => {
             flatListRef.current?.scrollToEnd({ animated: true });
         }, 100);
-    }, [messages]);
+    }, [messages, isTyping]);
 
-    const handleSend = () => {
-        if (!inputText.trim()) return;
+    const handleSend = async (textOverride?: string) => {
+        const textToSend = textOverride || inputText;
 
-        const newMessage = {
+        if (!textToSend.trim()) return;
+
+        const userMsg: Message = {
             id: Date.now().toString(),
-            text: inputText,
+            text: textToSend,
             sender: 'user',
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
 
-        setMessages((prev) => [...prev, newMessage]);
+        setMessages((prev) => [...prev, userMsg]);
         setInputText('');
+        setIsTyping(true);
 
-        setTimeout(() => {
-            const aiResponse = {
+        try {
+            const responseText = await chatService.sendMessage(textToSend);
+
+            const aiMsg: Message = {
                 id: (Date.now() + 1).toString(),
-                text: 'Rozumiem. Przetwarzam Twoje zapytanie...',
+                text: responseText,
                 sender: 'ai',
                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
-            setMessages((prev) => [...prev, aiResponse]);
-        }, 1500);
+            setMessages((prev) => [...prev, aiMsg]);
+
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Błąd", "Nie udało się połączyć z asystentem. Sprawdź internet.");
+        } finally {
+            setIsTyping(false);
+        }
     };
 
-    const renderMessage = ({ item }: any) => {
+    const renderMessage = ({ item }: { item: Message }) => {
         const isUser = item.sender === 'user';
 
         return (
@@ -106,7 +114,7 @@ export default function ChatScreen() {
                 ]}>
                     <Text style={[
                         styles.messageText,
-                        { color: isUser ? '#1A1A1A' : theme.text } // Tekst na primary (miętowym) lepiej wygląda ciemny
+                        { color: isUser ? '#1A1A1A' : theme.text }
                     ]}>
                         {item.text}
                     </Text>
@@ -129,16 +137,18 @@ export default function ChatScreen() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color={theme.text} />
                 </TouchableOpacity>
-                <View>
+                <View style={{ marginLeft: 20}}>
                     <Text style={[styles.headerTitle, { color: theme.text }]}>Asystent StuMedicAI</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                        <View style={styles.statusDot} />
-                        <Text style={[styles.headerSubtitle, { color: theme.textSecondary }]}>Dostępny online</Text>
+                        <View style={[styles.statusDot, { backgroundColor: isTyping ? '#FF9500' : '#4CD964' }]} />
+                        <Text style={[styles.headerSubtitle, { color: theme.textSecondary }]}>
+                            {isTyping ? 'Pisze...' : 'Dostępny online'}
+                        </Text>
                     </View>
                 </View>
-                <TouchableOpacity style={styles.menuButton}>
-                    <Ionicons name="ellipsis-horizontal" size={24} color={theme.text} />
-                </TouchableOpacity>
+                {/*<TouchableOpacity style={styles.menuButton}>*/}
+                {/*    <Ionicons name="ellipsis-horizontal" size={24} color={theme.text} />*/}
+                {/*</TouchableOpacity>*/}
             </View>
 
             {/* --- DISCLAIMER --- */}
@@ -157,6 +167,18 @@ export default function ChatScreen() {
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
+                ListFooterComponent={
+                    isTyping ? (
+                        <View style={styles.messageRowAi}>
+                            <View style={[styles.avatarContainer, { backgroundColor: theme.surface }]}>
+                                <Ionicons name="sparkles" size={16} color="#5856D6" />
+                            </View>
+                            <View style={[styles.bubble, { backgroundColor: theme.surface, borderBottomLeftRadius: 2, paddingVertical: 12 }]}>
+                                <ActivityIndicator size="small" color={theme.textSecondary} />
+                            </View>
+                        </View>
+                    ) : null
+                }
             />
 
             {/* --- SUGGESTIONS & INPUT --- */}
@@ -164,7 +186,6 @@ export default function ChatScreen() {
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
             >
-                {/* Sugestie (tylko gdy klawiatura ukryta lub zawsze - zależy od preferencji, tu dajemy zawsze nad inputem) */}
                 <View style={styles.suggestionsContainer}>
                     <FlatList
                         data={SUGGESTIONS}
@@ -174,7 +195,7 @@ export default function ChatScreen() {
                         renderItem={({item}) => (
                             <TouchableOpacity
                                 style={[styles.suggestionChip, { backgroundColor: theme.surface, borderColor: theme.border }]}
-                                onPress={() => setInputText(item)}
+                                onPress={() => handleSend(item)} // Kliknięcie od razu wysyła
                             >
                                 <Text style={{ fontSize: 13, color: theme.textSecondary }}>{item}</Text>
                             </TouchableOpacity>
@@ -200,10 +221,10 @@ export default function ChatScreen() {
                     <TouchableOpacity
                         style={[
                             styles.sendButton,
-                            { backgroundColor: inputText.trim() ? theme.primary : theme.border }
+                            { backgroundColor: inputText.trim() || isTyping ? theme.primary : theme.border }
                         ]}
-                        disabled={!inputText.trim()}
-                        onPress={handleSend}
+                        disabled={!inputText.trim() || isTyping}
+                        onPress={() => handleSend()}
                     >
                         <Ionicons
                             name="arrow-up"
@@ -224,7 +245,7 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        // justifyContent: 'space-between',
         paddingHorizontal: 16,
         paddingVertical: 12,
         borderBottomWidth: StyleSheet.hairlineWidth,
@@ -241,7 +262,7 @@ const styles = StyleSheet.create({
         width: 6,
         height: 6,
         borderRadius: 3,
-        backgroundColor: '#4CD964',
+        marginRight: 4,
     },
     backButton: {
         padding: 4,
@@ -250,14 +271,14 @@ const styles = StyleSheet.create({
         padding: 4,
     },
     disclaimerContainer: {
-        backgroundColor: 'rgba(255, 149, 0, 0.1)', // Light orange background
+        backgroundColor: 'rgba(255, 149, 0, 0.1)',
         padding: 8,
         alignItems: 'center',
         justifyContent: 'center',
     },
     disclaimerText: {
         fontSize: 11,
-        color: '#FF9500', // Orange text
+        color: '#FF9500',
         textAlign: 'center',
     },
     listContent: {
@@ -276,6 +297,7 @@ const styles = StyleSheet.create({
     messageRowAi: {
         alignSelf: 'flex-start',
         justifyContent: 'flex-start',
+        marginBottom: 16,
     },
     avatarContainer: {
         width: 28,
@@ -284,12 +306,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 8,
-        marginTop: 2, // align with top of bubble
+        marginTop: 2,
     },
     bubble: {
         padding: 12,
         borderRadius: 20,
-        // Cienie dla subtelnej głębi
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.05,

@@ -18,6 +18,10 @@ export default function TabLayout() {
                     name="chat"
                     options={{ headerShown: false }}
                 />
+                <Stack.Screen
+                    name="appointment-calendar"
+                    options={{ headerShown: false }}
+                />
             </Stack>
         </BiometricGate>
     )

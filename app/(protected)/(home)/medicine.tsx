@@ -1,4 +1,4 @@
-import React, {createElement, useState, useCallback} from 'react';
+import React, {createElement, useState, useCallback, useEffect} from 'react';
 import {
     View,
     Text,
@@ -12,7 +12,7 @@ import {
     Platform,
     TouchableWithoutFeedback,
     Alert,
-    ScrollView, Switch, ActivityIndicator, RefreshControl
+    ScrollView, Switch, ActivityIndicator, RefreshControl, AppState
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,6 +24,7 @@ import { useFocusEffect } from "expo-router";
 import { useSession } from '@/context/AuthContext';
 import { medicationService, Medication } from '@/services/medicationService';
 import { syncLocalNotifications } from '@/services/notificationService';
+import { updateWidget } from "@/services/widgetService";
 
 export default function MedicineScreen() {
     const { session } = useSession();
@@ -55,6 +56,19 @@ export default function MedicineScreen() {
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [activeTimeIndex, setActiveTimeIndex] = useState<number | null>(null);
     const [tempDate, setTempDate] = useState(new Date());
+
+    useEffect(() => {
+        updateWidget(medications);
+    }, [medications]);
+
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', nextAppState => {
+            if (nextAppState === 'active') {
+                updateWidget(medications);
+            }
+        });
+        return () => subscription.remove();
+    }, [medications]);
 
     const fetchMedications = async () => {
         if (!session) return;

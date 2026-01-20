@@ -12,7 +12,13 @@
       "icon": "./assets/stumedica-icon-1.png",
       "supportsTablet": true,
       "bundleIdentifier": "pl.stumedica.stumedica-mobile",
-      "NSFaceIDUsageDescription": "Umożliwia użycie Face ID w celu odblokowania aplikacji StuMedica."
+      "NSFaceIDUsageDescription": "Umożliwia użycie Face ID w celu odblokowania aplikacji StuMedica.",
+      "appleTeamId": "J4KVAYX25M",
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.pl.stumedica.stumedica-mobile.widget"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -60,8 +66,8 @@
         {
           "faceIDPermission": "Umożliwia użycie Face ID w celu odblokowania aplikacji StuMedica."
         }
-      ]
-
+      ],
+      "@bacons/apple-targets"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -6,7 +6,7 @@ export const chatService = {
      * @param message Treść wiadomości użytkownika
      */
     async sendMessage(message: string): Promise<string> {
-        const response = await fetchWithAuth('/ask', {
+        const response = await fetchWithAuth('/chat/ask', {
             method: 'POST',
             body: JSON.stringify({ message }),
         });
