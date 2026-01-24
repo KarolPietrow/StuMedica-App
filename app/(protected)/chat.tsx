@@ -59,7 +59,6 @@ export default function ChatScreen() {
 
     const handleSend = async (textOverride?: string) => {
         const textToSend = textOverride || inputText;
-
         if (!textToSend.trim()) return;
 
         const userMsg: Message = {
@@ -74,7 +73,7 @@ export default function ChatScreen() {
         setIsTyping(true);
 
         try {
-            const responseText = await chatService.sendMessage(textToSend);
+            const responseText = await chatService.sendMessage(messages, textToSend);
 
             const aiMsg: Message = {
                 id: (Date.now() + 1).toString(),
@@ -146,9 +145,6 @@ export default function ChatScreen() {
                         </Text>
                     </View>
                 </View>
-                {/*<TouchableOpacity style={styles.menuButton}>*/}
-                {/*    <Ionicons name="ellipsis-horizontal" size={24} color={theme.text} />*/}
-                {/*</TouchableOpacity>*/}
             </View>
 
             {/* --- DISCLAIMER --- */}
@@ -289,6 +285,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         marginBottom: 16,
         maxWidth: '85%',
+        width: 'auto',
+        flexShrink: 1,
     },
     messageRowUser: {
         alignSelf: 'flex-end',
@@ -316,6 +314,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.05,
         shadowRadius: 2,
         elevation: 1,
+        flexShrink: 1
     },
     messageText: {
         fontSize: 15,

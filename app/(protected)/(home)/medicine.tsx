@@ -327,7 +327,7 @@ export default function MedicineScreen() {
         }>
             <View style={styles.header}>
                 <Text style={[styles.headerTitle, { color: theme.text }]}>Moja Apteczka</Text>
-                {isLoading && <ActivityIndicator size="small" color={theme.primary} />}
+                {/*{isLoading && <ActivityIndicator size="small" color={theme.primary} />}*/}
             </View>
 
             <FlatList

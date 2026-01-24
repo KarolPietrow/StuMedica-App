@@ -8,6 +8,7 @@ import { pl } from 'date-fns/locale';
 import { Ionicons } from '@expo/vector-icons';
 import {COLORS, GLOBAL_STYLES} from '@/styles/theme';
 import { appointmentService, AppointmentSlot } from '@/services/appointmentService';
+import BackButton from "@/components/BackButton";
 
 LocaleConfig.locales['pl'] = {
     monthNames: ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'],
@@ -79,30 +80,17 @@ export default function BookAppointmentScreen() {
         return slots.filter(s => s.date_time.startsWith(selectedDate));
     }, [slots, selectedDate]);
 
-    const handleBook = async (slot: AppointmentSlot) => {
-        Alert.alert(
-            "Potwierdzenie",
-            `Czy chcesz umówić wizytę u ${slot.doctor.name} na godzinę ${format(parseISO(slot.date_time), 'HH:mm')}?`,
-            [
-                { text: "Anuluj", style: "cancel" },
-                {
-                    text: "Umów",
-                    onPress: async () => {
-                        setBookingInProgress(slot.id);
-                        try {
-                            await appointmentService.bookAppointment(slot.id);
-                            Alert.alert("Sukces", "Wizyta została umówiona!", [
-                                { text: "OK", onPress: () => router.back() } // Wróć do listy wizyt
-                            ]);
-                        } catch (e) {
-                            Alert.alert("Błąd", "Nie udało się zarezerwować wizyty.");
-                        } finally {
-                            setBookingInProgress(null);
-                        }
-                    }
-                }
-            ]
-        );
+    const handleBook = (slot: AppointmentSlot) => {
+        router.push({
+            pathname: '/(protected)/booking-summary',
+            params: {
+                slotId: slot.id,
+                doctorName: slot.doctor.name,
+                specialization: slot.doctor.specialization,
+                price: slot.doctor.price_private,
+                date: slot.date_time
+            }
+        });
     };
 
     const renderEmptySelection = () => (
@@ -136,6 +124,7 @@ export default function BookAppointmentScreen() {
         }>
             {/* Header */}
             <View style={styles.header}>
+                {/*<BackButton style={styles.backButton} onPress={() => router.back()}/>*/}
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color={theme.text} />
                 </TouchableOpacity>

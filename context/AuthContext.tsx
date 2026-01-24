@@ -97,7 +97,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
                 await saveToken(data.token);
                 setSession(data.token);
                 await refreshUser();
-                router.replace('/dashboard');
+                if (Platform.OS === 'web') {
+                    // router.dismissAll()
+                    router.replace('/dashboard');
+                } else {
+                    // router.dismissAll()
+                    router.replace('/notification-request')
+                }
             }
         } catch (error) {
             console.error(error);

@@ -11,12 +11,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import {router, useFocusEffect} from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+import { format, parseISO, isAfter } from 'date-fns';
+import { pl } from 'date-fns/locale';
 
-import { COLORS, GLOBAL_STYLES, SIZES } from '@/styles/theme';
+import { COLORS, GLOBAL_STYLES } from '@/styles/theme';
 import { useSession } from '@/context/AuthContext';
-import {Medication, medicationService} from "@/services/medicationService";
-
+import { Medication, medicationService } from "@/services/medicationService";
+import { appointmentService, AppointmentSlot } from '@/services/appointmentService';
 
 interface DoseTask {
     uniqueId: string;
@@ -24,16 +26,6 @@ interface DoseTask {
     time: string;
     isPast: boolean;
 }
-
-const MOCK_NEXT_APPOINTMENT = {
-    id: 101,
-    doctorName: 'dr n. med. Anna Nowak',
-    specialty: 'Kardiolog',
-    date: '28 Sty',
-    time: '15:30',
-    location: 'Gabinet 204, II Piętro',
-    avatar: null // Tu mógłby być URL do zdjęcia lekarza
-};
 
 export default function Dashboard() {
     const { session, user } = useSession();
@@ -43,8 +35,9 @@ export default function Dashboard() {
     const firstName = user?.name ? user.name.split(' ')[0] : 'Pacjencie';
 
     const [todaysDoses, setTodaysDoses] = useState<DoseTask[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
     const [nextDose, setNextDose] = useState<DoseTask | null>(null);
+    const [nextAppointment, setNextAppointment] = useState<AppointmentSlot | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const processSchedule = (meds: Medication[]) => {
         const now = new Date();
@@ -77,7 +70,6 @@ export default function Dashboard() {
         });
 
         setTodaysDoses(tasks);
-
         const next = tasks.find(t => !t.isPast);
         setNextDose(next || null);
     };
@@ -86,8 +78,16 @@ export default function Dashboard() {
         if (!session) return;
         setIsLoading(true);
         try {
-            const data = await medicationService.getAll(session);
-            processSchedule(data);
+            const medsData = await medicationService.getAll(session);
+            processSchedule(medsData);
+
+            const visitsData = await appointmentService.getMyAppointments();
+            const now = new Date();
+
+            const upcoming = visitsData.filter(visit => isAfter(parseISO(visit.date_time), now));
+            upcoming.sort((a, b) => new Date(a.date_time).getTime() - new Date(b.date_time).getTime());
+
+            setNextAppointment(upcoming.length > 0 ? upcoming[0] : null);
         } catch (e) {
             console.error("Błąd pobierania dashboardu", e);
         } finally {
@@ -98,52 +98,10 @@ export default function Dashboard() {
     useFocusEffect(
         useCallback(() => {
             fetchData();
-
-            const interval = setInterval(() => {
-                fetchData();
-            }, 60000);
-
+            const interval = setInterval(() => fetchData(), 60000);
             return () => clearInterval(interval);
-        }, [session])
+            }, [session])
     );
-
-    const renderDoseItem = (item: DoseTask) => {
-        const isTaken = item.isPast;
-
-        return (
-            <View key={item.uniqueId} style={[styles.doseCard, { backgroundColor: theme.surface }]}>
-                <View style={styles.timeColumn}>
-                    <Text style={[styles.doseTime, { color: isTaken ? theme.textSecondary : theme.text }]}>
-                        {item.time}
-                    </Text>
-                    <View style={[styles.timelineLine, { backgroundColor: theme.border }]} />
-                </View>
-
-                <View style={styles.doseInfo}>
-                    <Text style={[
-                        styles.doseName,
-                        { color: isTaken ? theme.textSecondary : theme.text, textDecorationLine: isTaken ? 'line-through' : 'none' }
-                    ]}>
-                        {item.medication.name}
-                    </Text>
-                    <Text style={[styles.doseDosage, { color: theme.textSecondary }]}>
-                        {item.medication.dosage}
-                    </Text>
-                </View>
-
-                <View style={styles.statusColumn}>
-                    {isTaken ? (
-                        <View style={[styles.statusIcon, { backgroundColor: '#4CD964' }]}>
-                            <Ionicons name="checkmark" size={16} color="#FFF" />
-                        </View>
-                    ) : (
-                        <View style={[styles.statusIcon, { backgroundColor: theme.background, borderWidth: 2, borderColor: theme.border }]}>
-                        </View>
-                    )}
-                </View>
-            </View>
-        );
-    };
 
     const getGreeting = () => {
         const hour = new Date().getHours();
@@ -222,7 +180,7 @@ export default function Dashboard() {
                 showsVerticalScrollIndicator={false}
                 // contentContainerStyle={{ paddingBottom: 100 }}
                 refreshControl={
-                    <RefreshControl refreshing={isLoading} onRefresh={fetchData} tintColor={theme.primary} />
+                    <RefreshControl refreshing={isLoading} onRefresh={fetchData} tintColor={theme.background} />
                 }
             >
                 {/* --- HEADER: POWITANIE --- */}
@@ -279,55 +237,59 @@ export default function Dashboard() {
                 <View style={styles.sectionContainer}>
                     <SectionHeader title="Najbliższa wizyta" />
 
-                    {MOCK_NEXT_APPOINTMENT ? (
+                    {nextAppointment ? (
                         <TouchableOpacity
-                            style={[styles.appointmentCard, { backgroundColor: theme.surface }]}
+                            style={[
+                                styles.card,
+                                { backgroundColor: theme.surface, borderLeftColor: theme.primary, borderLeftWidth: 4 }
+                            ]}
                             activeOpacity={0.9}
                             onPress={() => router.push('/appointments')}
                         >
-                            {/* Lewa strona: Data */}
-                            <View style={[styles.dateBox, { backgroundColor: `${theme.primary}15` }]}>
-                                <Text style={[styles.dateDay, { color: theme.background}]}>
-                                    {MOCK_NEXT_APPOINTMENT.date.split(' ')[0]}
-                                </Text>
-                                <Text style={[styles.dateMonth, { color: theme.background}]}>
-                                    {MOCK_NEXT_APPOINTMENT.date.split(' ')[1]}
-                                </Text>
-                            </View>
-
-                            {/* Prawa strona: Info */}
-                            <View style={styles.appointmentInfo}>
-                                <Text style={[styles.doctorName, { color: theme.text }]}>
-                                    {MOCK_NEXT_APPOINTMENT.doctorName}
-                                </Text>
-                                <Text style={[styles.specialty, { color: theme.textSecondary }]}>
-                                    {MOCK_NEXT_APPOINTMENT.specialty}
-                                </Text>
-
-                                <View style={styles.appointmentMeta}>
-                                    <View style={styles.metaRow}>
-                                        <Ionicons name="time-outline" size={14} color={theme.textSecondary} />
-                                        <Text style={{ fontSize: 13, color: theme.textSecondary }}>
-                                            {MOCK_NEXT_APPOINTMENT.time}
-                                        </Text>
-                                    </View>
-                                    <View style={styles.metaRow}>
-                                        <Ionicons name="location-outline" size={14} color={theme.textSecondary} />
-                                        <Text style={{ fontSize: 13, color: theme.textSecondary }}>
-                                            Gabinet
-                                        </Text>
-                                    </View>
+                            <View style={styles.cardHeader}>
+                                <View style={[styles.avatar, { backgroundColor: theme.primary + '20' }]}>
+                                    <Text style={[styles.avatarText, {color: theme.background}]}>
+                                        {nextAppointment.doctor.name.charAt(0)}
+                                    </Text>
+                                </View>
+                                <View style={styles.cardContent}>
+                                    <Text style={[styles.doctorName, { color: theme.text }]}>
+                                        {nextAppointment.doctor.name}
+                                    </Text>
+                                    <Text style={[styles.specialization, { color: theme.textSecondary }]}>
+                                        {nextAppointment.doctor.specialization}
+                                    </Text>
+                                </View>
+                                <View style={[styles.badge, { backgroundColor: nextAppointment.type === 'NFZ' ? '#E3F2FD' : '#FFF3E0' }]}>
+                                    <Text style={[styles.badgeText, { color: nextAppointment.type === 'NFZ' ? '#1E88E5' : '#FB8C00' }]}>
+                                        {nextAppointment.type === 'NFZ' ? 'NFZ' : 'PRYWATNIE'}
+                                    </Text>
                                 </View>
                             </View>
 
-                            <Ionicons name="chevron-forward" size={20} color={theme.border} style={{ alignSelf: 'center' }} />
+                            <View style={[styles.divider, { backgroundColor: theme.border }]} />
+
+                            <View style={styles.cardFooter}>
+                                <View style={styles.footerItem}>
+                                    <Ionicons name="calendar-outline" size={16} color={theme.primary} />
+                                    <Text style={[styles.footerText, { color: theme.text, fontWeight: '600' }]}>
+                                        {format(parseISO(nextAppointment.date_time), 'd MMM, HH:mm', { locale: pl })}
+                                    </Text>
+                                </View>
+                                <View style={styles.footerItem}>
+                                    <Ionicons name="location-outline" size={16} color={theme.textSecondary} />
+                                    <Text style={[styles.footerText, { color: theme.textSecondary }]}>
+                                        StuMedica Lublin
+                                    </Text>
+                                </View>
+                            </View>
                         </TouchableOpacity>
                     ) : (
-                        // Stan pusty (brak wizyt)
+                        // Stan pusty
                         <View style={[styles.emptyCard, { backgroundColor: theme.surface }]}>
                             <Ionicons name="calendar-clear-outline" size={40} color={theme.textSecondary} />
                             <Text style={{ color: theme.textSecondary, marginTop: 10 }}>Brak nadchodzących wizyt</Text>
-                            <TouchableOpacity style={{ marginTop: 10 }}>
+                            <TouchableOpacity style={{ marginTop: 10 }} onPress={() => router.push('/appointments')}>
                                 <Text style={{ color: theme.primary, fontWeight: 'bold' }}>Umów wizytę teraz</Text>
                             </TouchableOpacity>
                         </View>
@@ -478,11 +440,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
     },
-    doctorName: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 2,
-    },
     specialty: {
         fontSize: 13,
         marginBottom: 8,
@@ -623,5 +580,29 @@ const styles = StyleSheet.create({
     emptyState: {
         alignItems: 'center',
         marginTop: 20,
-    }
+    },
+    card: {
+        marginHorizontal: 20, borderRadius: 16, padding: 16,
+        shadowColor: "#000", shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05, shadowRadius: 5, elevation: 2,
+    },
+    cardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12
+    },
+    avatar: {
+        width: 48, height: 48, borderRadius: 24,
+        justifyContent: 'center', alignItems: 'center', marginRight: 12,
+    },
+    avatarText: { fontSize: 20, fontWeight: 'bold' },
+    cardContent: { flex: 1 },
+    doctorName: { fontSize: 16, fontWeight: 'bold' },
+    specialization: { fontSize: 13 },
+    badge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
+    badgeText: { fontSize: 10, fontWeight: '700' },
+    divider: { height: 1, width: '100%', marginBottom: 12 },
+    cardFooter: { flexDirection: 'row', justifyContent: 'space-between' },
+    footerItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    footerText: { fontSize: 13 },
 });

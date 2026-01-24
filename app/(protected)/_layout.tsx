@@ -22,6 +22,14 @@ export default function TabLayout() {
                     name="appointment-calendar"
                     options={{ headerShown: false }}
                 />
+                <Stack.Screen
+                    name="booking-summary"
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="booking-success"
+                    options={{ headerShown: false }}
+                />
             </Stack>
         </BiometricGate>
     )
