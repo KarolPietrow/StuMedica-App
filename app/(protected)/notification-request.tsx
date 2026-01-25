@@ -10,8 +10,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { COLORS, SIZES } from '@/styles/theme';
+import {COLORS, GLOBAL_STYLES, SIZES} from '@/styles/theme';
 import { useNotificationObserver } from '@/hooks/useNotificationObserver'; // Twój hook
+import { GlassView } from "expo-glass-effect";
 
 export default function NotificationRequestScreen() {
     const router = useRouter();
@@ -84,13 +85,23 @@ export default function NotificationRequestScreen() {
                     </View>
 
                     <View style={styles.footerSection}>
-                        <TouchableOpacity
-                            style={[styles.primaryButton, {backgroundColor: theme.primary}]}
-                            activeOpacity={0.8}
-                            onPress={handleEnable}
+                        <GlassView
+                            isInteractive
+                            style={{
+                                borderRadius: SIZES.radius,
+                            }}
                         >
-                            <Text style={styles.primaryButtonText}>Włącz powiadomienia</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[
+                                    GLOBAL_STYLES.primaryButton,
+                                    GLOBAL_STYLES.shadow,
+                                ]}
+                                onPress={ handleEnable }
+                                activeOpacity={0.8}
+                            >
+                                <Text style={styles.primaryButtonText}>Włącz powiadomienia</Text>
+                            </TouchableOpacity>
+                        </GlassView>
 
                         <TouchableOpacity
                             style={styles.secondaryButton}

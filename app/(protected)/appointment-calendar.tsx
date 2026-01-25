@@ -34,6 +34,12 @@ export default function BookAppointmentScreen() {
         loadSlots();
     }, [specialization]);
 
+    useEffect(() => {
+        if (specialization === undefined) {
+            router.replace("/dashboard");
+        }
+    })
+
     const loadSlots = async () => {
         try {
             const data = await appointmentService.getAvailableSlots(specialization);

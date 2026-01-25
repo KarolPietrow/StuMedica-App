@@ -59,7 +59,7 @@ export default function TabLayout() {
             <NativeTabs
                 tintColor={DynamicColorIOS({
                     dark: COLORS.light.primary,
-                    light: COLORS.light.primary,
+                    light: COLORS.light.primary
                 })}
             >
                 <NativeTabs.Trigger name="dashboard">
