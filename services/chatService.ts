@@ -8,7 +8,7 @@ interface Message {
 }
 
 export const chatService = {
-    async sendMessage(allMessages: Message[], newMessageText: string): Promise<string> {
+    async sendMessage(allMessages: Message[], newMessageText: string, localMode: boolean = false): Promise<string> {
 
         const history = allMessages.map(msg => ({
             role: msg.sender === 'ai' ? 'model' : 'user',
@@ -23,7 +23,9 @@ export const chatService = {
         const response = await fetchWithAuth('/chat/ask', {
             method: 'POST',
             body: JSON.stringify({
-                history: history
+                history: history,
+                local_mode: localMode,
+                use_functions: true
             }),
         });
 

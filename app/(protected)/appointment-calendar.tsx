@@ -131,7 +131,13 @@ export default function BookAppointmentScreen() {
             {/* Header */}
             <View style={styles.header}>
                 {/*<BackButton style={styles.backButton} onPress={() => router.back()}/>*/}
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                <TouchableOpacity onPress={ () => {
+                    if (router.canGoBack()) {
+                        router.back()
+                    } else {
+                        router.replace("/dashboard");
+                    }
+                }} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color={theme.text} />
                 </TouchableOpacity>
                 <View>

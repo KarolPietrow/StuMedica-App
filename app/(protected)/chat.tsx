@@ -11,7 +11,7 @@ import {
     useColorScheme,
     ActivityIndicator,
     Alert,
-    Keyboard
+    Keyboard, Switch
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -49,6 +49,8 @@ export default function ChatScreen() {
     const [inputText, setInputText] = useState('');
     const [isTyping, setIsTyping] = useState(false); // <--- Stan ładowania
 
+    const [isLocalMode, setIsLocalMode] = useState(false);
+
     const flatListRef = useRef<FlatList>(null);
 
     useEffect(() => {
@@ -73,7 +75,7 @@ export default function ChatScreen() {
         setIsTyping(true);
 
         try {
-            const responseText = await chatService.sendMessage(messages, textToSend);
+            const responseText = await chatService.sendMessage(messages, textToSend, isLocalMode);
 
             const aiMsg: Message = {
                 id: (Date.now() + 1).toString(),
@@ -128,15 +130,31 @@ export default function ChatScreen() {
         );
     };
 
+    const handleKeyPress = (e: any) => {
+        if (Platform.OS === 'web') {
+            if (e.nativeEvent.key === 'Enter' && !e.nativeEvent.shiftKey) {
+                e.preventDefault();
+                handleSend();
+            }
+        }
+    };
+
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
 
             {/* --- HEADER --- */}
             <View style={[styles.header, { borderBottomColor: theme.border }]}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                <TouchableOpacity onPress={ () => {
+                    if (router.canGoBack()) {
+                        router.back()
+                    } else {
+                        router.replace("/dashboard");
+                    }
+                }} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color={theme.text} />
                 </TouchableOpacity>
-                <View style={{ marginLeft: 20}}>
+
+                <View style={{ flex: 1, alignItems: 'center' }}>
                     <Text style={[styles.headerTitle, { color: theme.text }]}>Asystent StuMedicAI</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                         <View style={[styles.statusDot, { backgroundColor: isTyping ? '#FF9500' : '#4CD964' }]} />
@@ -144,6 +162,20 @@ export default function ChatScreen() {
                             {isTyping ? 'Pisze...' : 'Dostępny online'}
                         </Text>
                     </View>
+                </View>
+
+                <View style={styles.modeSwitchContainer}>
+                    <Text style={[styles.modeLabel, { color: theme.textSecondary }]}>
+                        {isLocalMode ? 'LOCAL' : 'GEMINI'}
+                    </Text>
+                    <Switch
+                        trackColor={{ false: "#767577", true: theme.primary }}
+                        thumbColor={"#f4f3f4"}
+                        ios_backgroundColor="#3e3e3e"
+                        onValueChange={() => setIsLocalMode(prev => !prev)}
+                        value={!isLocalMode}
+                        style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] }}
+                    />
                 </View>
             </View>
 
@@ -177,10 +209,9 @@ export default function ChatScreen() {
                 }
             />
 
-            {/* --- SUGGESTIONS & INPUT --- */}
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
             >
                 <View style={styles.suggestionsContainer}>
                     <FlatList
@@ -191,7 +222,8 @@ export default function ChatScreen() {
                         renderItem={({item}) => (
                             <TouchableOpacity
                                 style={[styles.suggestionChip, { backgroundColor: theme.surface, borderColor: theme.border }]}
-                                onPress={() => handleSend(item)} // Kliknięcie od razu wysyła
+                                disabled={isTyping}
+                                onPress={() => handleSend(item)}
                             >
                                 <Text style={{ fontSize: 13, color: theme.textSecondary }}>{item}</Text>
                             </TouchableOpacity>
@@ -201,10 +233,6 @@ export default function ChatScreen() {
 
                 {/* Input Bar */}
                 <View style={[styles.inputContainer, { backgroundColor: theme.surface, borderTopColor: theme.border }]}>
-                    <TouchableOpacity style={styles.attachButton}>
-                        <Ionicons name="add-circle-outline" size={28} color={theme.textSecondary} />
-                    </TouchableOpacity>
-
                     <TextInput
                         style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
                         placeholder="Napisz wiadomość..."
@@ -212,8 +240,8 @@ export default function ChatScreen() {
                         value={inputText}
                         onChangeText={setInputText}
                         multiline
+                        onKeyPress={handleKeyPress}
                     />
-
                     <TouchableOpacity
                         style={[
                             styles.sendButton,
@@ -295,7 +323,7 @@ const styles = StyleSheet.create({
     messageRowAi: {
         alignSelf: 'flex-start',
         justifyContent: 'flex-start',
-        marginBottom: 16,
+        // marginBottom: 16,
     },
     avatarContainer: {
         width: 28,
@@ -346,12 +374,15 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
-        height: 40,
-        borderRadius: 20,
-        paddingHorizontal: 16,
-        marginRight: 8,
-        fontSize: 15,
-        maxHeight: 100,
+        minHeight: 48,
+        maxHeight: 120,
+        borderRadius: 24,
+        paddingHorizontal: 18,
+        paddingTop: 12,
+        paddingBottom: 12,
+        marginRight: 10,
+        fontSize: 16,
+        borderWidth: 1,
     },
     sendButton: {
         width: 40,
@@ -359,5 +390,16 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    modeSwitchContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: 8,
+        marginRight: 8,
+    },
+    modeLabel: {
+        fontSize: 8,
+        fontWeight: 'bold',
+        marginBottom: -4,
     },
 });

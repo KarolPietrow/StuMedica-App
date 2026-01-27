@@ -39,8 +39,7 @@ export default function BookingSummaryScreen() {
     return (
         <SafeAreaView
             style={[GLOBAL_STYLES.container, { backgroundColor: theme.background }]}
-            edges={['right', 'left', 'top']
-        }>
+        >
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>

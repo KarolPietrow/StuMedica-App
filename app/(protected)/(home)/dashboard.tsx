@@ -260,8 +260,8 @@ export default function Dashboard() {
                                         {nextAppointment.doctor.specialization}
                                     </Text>
                                 </View>
-                                <View style={[styles.badge, { backgroundColor: nextAppointment.type === 'NFZ' ? '#E3F2FD' : '#FFF3E0' }]}>
-                                    <Text style={[styles.badgeText, { color: nextAppointment.type === 'NFZ' ? '#1E88E5' : '#FB8C00' }]}>
+                                <View style={[styles.badge, { backgroundColor: nextAppointment.type === 'NFZ' ? '#E3F2FD' : (colorScheme === 'dark' ? '#FB8C00' : '#FFF3E0') }]}>
+                                    <Text style={[styles.badgeText, { color: nextAppointment.type === 'NFZ' ? '#1E88E5' : (colorScheme === 'dark' ? '#FFF3E0' : '#FB8C00') }]}>
                                         {nextAppointment.type === 'NFZ' ? 'NFZ' : 'PRYWATNIE'}
                                     </Text>
                                 </View>

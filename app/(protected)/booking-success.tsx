@@ -19,8 +19,7 @@ export default function BookingSuccessScreen() {
     return (
         <SafeAreaView
             style={[GLOBAL_STYLES.container, { backgroundColor: theme.background }]}
-            edges={['right', 'left', 'top']
-        }>
+        >
             <View style={styles.content}>
 
                 {/* Animacja/Ikona Sukcesu */}

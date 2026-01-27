@@ -93,7 +93,7 @@ export default function AppointmentsScreen() {
             }]}>
                 <View style={styles.cardHeader}>
                     <View style={[styles.avatar, { backgroundColor: theme.primary + '20' }]}>
-                        <Text style={styles.avatarText}>
+                        <Text style={[styles.avatarText, { color: theme.background}]}>
                             {visit.doctor.name.charAt(0)}
                         </Text>
                     </View>
@@ -102,8 +102,8 @@ export default function AppointmentsScreen() {
                         <Text
                             style={[styles.specialization, {color: theme.textSecondary}]}>{visit.doctor.specialization}</Text>
                     </View>
-                    <View style={[styles.badge, {backgroundColor: visit.type === 'NFZ' ? '#E3F2FD' : '#FFF3E0'}]}>
-                        <Text style={[styles.badgeText, {color: visit.type === 'NFZ' ? '#1E88E5' : '#FB8C00'}]}>
+                    <View style={[styles.badge, {backgroundColor: visit.type === 'NFZ' ? '#E3F2FD' : (colorScheme === 'dark' ? '#FB8C00' : '#FFF3E0')}]}>
+                        <Text style={[styles.badgeText, {color: visit.type === 'NFZ' ? '#1E88E5' : (colorScheme === 'dark' ? '#FFF3E0' : '#FB8C00')}]}>
                             {visit.type === 'NFZ' ? 'NFZ' : 'PRYWATNIE'}
                         </Text>
                     </View>
@@ -404,7 +404,6 @@ const styles = StyleSheet.create({
         marginRight: 12,
     },
     avatarText: {
-        color: '#FFF',
         fontSize: 20,
         fontWeight: 'bold',
     },
