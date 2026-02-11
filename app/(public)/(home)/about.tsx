@@ -42,7 +42,7 @@ export default function About() {
                                 Dostępna jest aplikacja webowa w przeglądarce (stumedica.pl), oraz aplikacja mobilna na urządzenia iOS oraz Android.
                             </Text>
                             <Text style={[styles.description, { color: theme.text }]}>
-                                Aplikacja została napisana w React Native (Expo&nbsp;54). Serwer został napisany w Pythonie (SQLite,&nbsp;FastAPI)
+                                Aplikacja została napisana w React Native (Expo&nbsp;54). Serwer został napisany w Pythonie (FastAPI)
                             </Text>
                         </View>
                     </View>
