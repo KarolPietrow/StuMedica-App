@@ -9,7 +9,6 @@ import {
     View
 } from "react-native";
 import { COLORS, GLOBAL_STYLES, SIZES } from "@/styles/theme";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import React, {useEffect, useState} from "react";
 import { useSession } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,7 +16,6 @@ import { router } from "expo-router";
 import { GlassView } from "expo-glass-effect";
 
 import { useNotificationObserver } from "@/hooks/useNotificationObserver";
-import {scheduleTestNotification} from "@/services/notificationService";
 import {biometricService} from "@/services/biometricService";
 import {SafeAreaView} from "react-native-safe-area-context";
 
@@ -373,10 +371,10 @@ export default function Account() {
                             onPress={() => router.push('/terms-of-service')}
                         />
                         <ActionRow
-                        label="Kontakt z nami"
-                        icon="mail-outline"
+                        label="Polityka Prywatności"
+                        icon="document-lock-outline"
                         color="#007AFF"
-                        onPress={() => alert("[TODO] Jeszcze nie zaimplementowane")}
+                        onPress={() => router.push('/privacy-policy')}
                         />
                         <ActionRow
                             label="Informacje o aplikacji"

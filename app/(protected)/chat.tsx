@@ -18,7 +18,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from "expo-router";
 
 import { COLORS } from '@/styles/theme';
-import { chatService } from '@/services/chatService'; // <--- IMPORT SERWISU
+import { chatService } from '@/services/chatService';
+import BackButton from "@/components/BackButton"; // <--- IMPORT SERWISU
 
 interface Message {
     id: string;
@@ -144,15 +145,14 @@ export default function ChatScreen() {
 
             {/* --- HEADER --- */}
             <View style={[styles.header, { borderBottomColor: theme.border }]}>
-                <TouchableOpacity onPress={ () => {
+                <BackButton onPress={() => {
                     if (router.canGoBack()) {
                         router.back()
                     } else {
                         router.replace("/dashboard");
                     }
-                }} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={theme.text} />
-                </TouchableOpacity>
+                }}/>
+
 
                 <View style={{ flex: 1, alignItems: 'center' }}>
                     <Text style={[styles.headerTitle, { color: theme.text }]}>Asystent StuMedicAI</Text>
@@ -164,19 +164,19 @@ export default function ChatScreen() {
                     </View>
                 </View>
 
-                <View style={styles.modeSwitchContainer}>
-                    <Text style={[styles.modeLabel, { color: theme.textSecondary }]}>
-                        {isLocalMode ? 'LOCAL' : 'GEMINI'}
-                    </Text>
-                    <Switch
-                        trackColor={{ false: "#767577", true: theme.primary }}
-                        thumbColor={"#f4f3f4"}
-                        ios_backgroundColor="#3e3e3e"
-                        onValueChange={() => setIsLocalMode(prev => !prev)}
-                        value={!isLocalMode}
-                        style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] }}
-                    />
-                </View>
+                {/*<View style={styles.modeSwitchContainer}>*/}
+                {/*    <Text style={[styles.modeLabel, { color: theme.textSecondary }]}>*/}
+                {/*        {isLocalMode ? 'LOCAL' : 'GEMINI'}*/}
+                {/*    </Text>*/}
+                {/*    <Switch*/}
+                {/*        trackColor={{ false: "#767577", true: theme.primary }}*/}
+                {/*        thumbColor={"#f4f3f4"}*/}
+                {/*        ios_backgroundColor="#3e3e3e"*/}
+                {/*        onValueChange={() => setIsLocalMode(prev => !prev)}*/}
+                {/*        value={!isLocalMode}*/}
+                {/*        style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] }}*/}
+                {/*    />*/}
+                {/*</View>*/}
             </View>
 
             {/* --- DISCLAIMER --- */}
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
     },
     header: {
         flexDirection: 'row',
-        alignItems: 'center',
+        // alignItems: 'center',
         // justifyContent: 'space-between',
         paddingHorizontal: 16,
         paddingVertical: 12,

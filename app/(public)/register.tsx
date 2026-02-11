@@ -270,8 +270,18 @@ export default function Register() {
                                         }}
                                         style={{ color: COLORS.light.primary, fontWeight: 'bold' }}
                                     >
-                                        Regulamin StuMedica
+                                        Regulamin
                                     </Text>
+                                    {' '}oraz{' '}
+                                    <Text
+                                        onPress={(e) => {
+                                            router.push('/privacy-policy');
+                                        }}
+                                        style={{ color: COLORS.light.primary, fontWeight: 'bold' }}
+                                    >
+                                        Politykę Prywatności
+                                    </Text>
+                                    {' '}StuMedica.
                                 </Text>
                             </View>
                         </TouchableOpacity>

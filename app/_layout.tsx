@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import "@/styles/global.css"
 import { SessionProvider, useSession } from '@/context/AuthContext';
 import {Head} from "expo-router/build/head";
+import CookieBanner from "@/components/CookieBanner";
 
 export default function RootLayout() {
     return (
@@ -67,12 +68,19 @@ function InitialLayout() {
                         headerShown: false
                     }} />
                 <Stack.Screen
+                    name="privacy-policy"
+                    options={{
+                        // presentation: 'modal',
+                        headerShown: false
+                    }} />
+                <Stack.Screen
                     name="aboutMain"
                     options={{
                         // presentation: 'modal',
                         headerShown: false
                     }} />
             </Stack>
+            <CookieBanner />
         </ThemeProvider>
         </>
     )

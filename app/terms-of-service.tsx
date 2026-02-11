@@ -16,7 +16,13 @@ export default function TermsOfService() {
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
-            <BackButton onPress={() => { router.back()}} />
+            <BackButton onPress={() => {
+                if (router.canGoBack()) {
+                    router.back()
+                } else {
+                    router.replace("/dashboard");
+                }
+            }} />
             <ScrollView>
                 <View style={styles.contentContainer}>
                     <View style={GLOBAL_STYLES.center}>
