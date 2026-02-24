@@ -54,7 +54,7 @@ export default function PrivacyPolicy() {
                                 Niniejsza Polityka Prywatności określa zasady przetwarzania i ochrony danych osobowych użytkowników korzystających z aplikacji StuMedica w wersji mobilnej oraz webowej (dalej: “Aplikacja”).
                             </Text>
                             <Text style={[styles.text, { color: theme.text }]}>
-                                Administratorem danych osobowych użytkowników jest Karol Pietrów, adres e-mail do kontaktu: karol.pietrow@icloud.com (dalej: “Administrator”).
+                                Administratorem danych osobowych użytkowników jest firma StuMedica z siedzibą w Lublinie, adres e-mail do kontaktu: kontakt@stumedica.pl (dalej: “Administrator”).
                             </Text>
                             <Text style={[styles.text, { color: theme.text }]}>
                                 Dbamy o bezpieczeństwo Twoich danych i szanujemy Twoje prawo do prywatności. Dane są przetwarzane zgodnie z Rozporządzeniem Parlamentu Europejskiego i Rady (UE) 2016/679 z dnia 27 kwietnia 2016 r. w sprawie ochrony osób fizycznych w związku z przetwarzaniem danych osobowych i w sprawie swobodnego przepływu takich danych oraz uchylenia dyrektywy 95/46/WE (ogólne rozporządzenie o ochronie danych, dalej: “RODO”).
@@ -217,7 +217,7 @@ export default function PrivacyPolicy() {
                                 - Prawo do cofnięcia zgody w dowolnym momencie (bez wpływu na zgodność z prawem przetwarzania przed jej cofnięciem).
                             </Text>
                             <Text style={[styles.text, { color: theme.text }]}>
-                                Aby skorzystać z tych praw, prosimy o kontakt pod adresem: karol.pietrow@icloud.com.
+                                Aby skorzystać z przysługujących Ci praw, skontaktuj się z Administratorem.
                             </Text>
                             <Text style={[styles.text, { color: theme.text }]}>
                                 Masz również prawo wniesienia skargi do organu nadzorczego (w Polsce: Prezes Urzędu Ochrony Danych Osobowych, ul. Stawki 2, 00-193 Warszawa), jeśli uznasz, że przetwarzamy Twoje dane niezgodnie z prawem.
