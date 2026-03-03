@@ -139,7 +139,7 @@ export default function PrivacyPolicy() {
                                 Baza danych (Przechowywanie danych):
                             </Text>
                             <Text style={[styles.text, { color: theme.text }]}>
-                                - Neon.tech (dostawca: Neon Inc.) – baza danych zlokalizowana w infrastrukturze chmurowej w Niemczech (EOG)..
+                                - Neon.tech (dostawca: Neon Inc.) – baza danych zlokalizowana w infrastrukturze chmurowej w Niemczech (EOG).
                             </Text>
                             <Text style={[styles.subsection, { color: theme.text }]}>
                                 Dostarczanie treści (CDN):
