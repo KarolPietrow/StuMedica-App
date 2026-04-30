@@ -1,50 +1,33 @@
-# Welcome to your Expo app 👋
+# StuMedica - Personal Health & Medical Assistant app
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+[![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactnative.dev/)
+[![Expo](https://img.shields.io/badge/Expo-1B1F23?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev/)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 
-## Get started
+**StuMedica** is a comprehensive, cross-platform medical application developed as a university project. It aims to simplify personal health management by offering features like a virtual medicine cabinet, medication reminders, appointment scheduling, and an intelligent AI assistant capable of handling user requests.
 
-1. Install dependencies
+Built with **React Native (Expo)**, the application runs seamlessly across **Android, iOS, and the Web**. 
 
-   ```bash
-   npm install
-   ```
+**Backend Repository:** https://github.com/KarolPietrow/StuMedica-Server
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## Virtual Medicine Cabinet
+Keep track of all your medications in one place. Users can easily add and manage their prescribed medicine. All data is securely synchronized and saved on the server.
 
-In the output, you'll find options to open the app in a
+## Notification support
+The app features a built-in notification system that sends reminders to users about their scheduled medications.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Doctor Appointments (simulated)
+Ability to book doctor appointments:
+*   Select the required medical specialty or type of visit.
+*   Browse a calendar for available time slots.
+*   Fill out details about the visit and select payment type.
+*   Confirm and schedule the appointment.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Intelligent AI Assistant
+The app features an advanced, integrated conversational AI. Communicating with the Python backend, the assistant leverages the **Gemini API** powered by **RAG (Retrieval-Augmented Generation)** and **Function Calling**. 
+*   **Informative:** Answers general questions about the application's usage.
+*   **Context-Aware:** Can fetch and display the user's current medications and upcoming doctor appointments.
+*   **Action-Oriented:** Users can ask the assistant to add a new medication to their cabinet or book a doctor's appointment on their behalf using natural language.
